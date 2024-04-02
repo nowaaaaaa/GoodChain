@@ -39,3 +39,8 @@ def verify(message, signature, pbc_ser):
     except:
         print("Error executing 'public_key.verify'")
         return False
+    
+def hash_password(password):
+    digest = hashes.Hash(hashes.SHA256())
+    digest.update(bytes(password, 'utf-8'))
+    return digest.finalize()

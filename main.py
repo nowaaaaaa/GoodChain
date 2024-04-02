@@ -1,4 +1,4 @@
-from Frontend.MainMenu import MainMenu
+from GoodChain import *
 if __name__ == '__main__':
-    app = MainMenu()
-    app.show()
+    app = GoodChain()
+    app.run()
