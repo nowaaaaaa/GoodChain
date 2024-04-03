@@ -8,7 +8,7 @@ class Database:
         ('alex333', 'alex333')
     ]
     def __init__(self):
-        self.connection = sqlite3.connect('./Data/users.db')
+        self.connection = sqlite3.connect('./Data/users.sqlite')
         self.cursor = self.connection.cursor()
         self.setup_tables()
         
@@ -35,7 +35,6 @@ class Database:
             """, (username, hash_password(password), prv, pub))
         self.connection.commit()
 
-    # Write function verify_user(self, username, password) that returns the values of user, when password is correct
     def verify_user(self, username, password):
         self.cursor.execute("""
             SELECT * FROM users WHERE username = ? AND password_hash = ?
