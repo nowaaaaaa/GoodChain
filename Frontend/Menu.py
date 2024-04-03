@@ -6,24 +6,10 @@ class Menu:
         self.title = title
         self.items = items
         self.functions = functions
-        self.selected = 0
-        self.show()
+        self.terminal_menu = TerminalMenu(items, title, menu_cursor='>', menu_cursor_style=('fg_red', 'bold'), menu_highlight_style=('bg_blue', 'fg_yellow'))
         
     def show(self):
-        while True:
-            print("\033c")
-            print(self.title)
-            for i, item in enumerate(self.items):
-                if i == self.selected:
-                    print(f"> {item}")
-                else:
-                    print(f"  {item}")
-            key = read_key()
-            if key == u'\u2191':
-                self.selected = (self.selected - 1) % len(self.items)
-            elif key == u'\u2193':
-                self.selected = (self.selected + 1) % len(self.items)
-            elif key == "\r":
-                return self.selected
+        selected_index = self.terminal_menu.show()
+        self.functions[selected_index]()
         
 
