@@ -9,5 +9,5 @@ class GoodChain:
     def run(self):
         self.menu.show()
         self.database.cursor.execute("SELECT * FROM users")
-        for user in self.database.cursor:
-            print(user)
+        for data in self.database.verify_user('mike111', 'mike111'):
+            print(data)
