@@ -6,3 +6,4 @@ class MenuMain(Menu):
         items = [("Sign up", lambda : goodChain.setMenu(MenuSignUp(goodChain))), ("Log in", lambda : goodChain.setMenu(MenuLogIn(goodChain)))]
         # self.menu = Menu("GoodChain Main Menu", items)
         Menu.__init__(self, "GoodChain Main Menu", items)
+ 
