@@ -1,5 +1,5 @@
 import sqlite3
-from Backend.Signature import *
+from Signature import *
 
 class Database:
     default_users = [
@@ -41,6 +41,19 @@ class Database:
         """, (username, hash_password(password)))
         return self.cursor.fetchone() or []
     
+    def add_user(self, username, password):
+        prv, pub = generate_keys()
+        prv = prv.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.BestAvailableEncryption(password.encode('utf-8'))
+        )
+        self.cursor.execute("""
+            INSERT INTO users VALUES
+                (?, ?, ?, ?)
+        """, (username, hash_password(password), prv, pub))
+        self.connection.commit()
+
     def close(self):
         self.cursor.close()
         self.connection.close()

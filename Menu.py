@@ -1,8 +1,10 @@
-from simple_term_menu import TerminalMenu
+# from simple_term_menu import TerminalMenu
+from TerminalMenu import *
+from GoodChain import *
 
 class Menu:
-# implement a modular class to create menus you can navigate through using arrow keys without using consolemenu library
-    def __init__(self, items, functions):
+    def __init__(self, goodChain, title, items, functions):
+        self.goodChain = goodChain
         self.title = title
         self.items = items
         self.functions = functions
@@ -10,6 +12,6 @@ class Menu:
         
     def show(self):
         selected_index = self.terminal_menu.show()
-        self.functions[selected_index]()
+        return self.functions[selected_index]()
         
 
