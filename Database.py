@@ -41,6 +41,12 @@ class Database:
         """, (username, hash_password(password)))
         return self.cursor.fetchone() or []
     
+    def user_exists(self, username):
+        self.cursor.execute("""
+            SELECT * FROM users WHERE username = ?
+        """, (username,))
+        return self.cursor.fetchone() is not None
+    
     def add_user(self, username, password):
         prv, pub = generate_keys()
         prv = prv.private_bytes(

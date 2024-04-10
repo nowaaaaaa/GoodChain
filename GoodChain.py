@@ -24,3 +24,6 @@ class GoodChain:
 
     def setMenu(self, menu):
         self.menu = menu
+    
+    def check_balance(self):
+        return 0

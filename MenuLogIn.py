@@ -1,15 +1,14 @@
 from Menu import *
-from MenuMain import *
 from MenuUser import MenuUser
 from InputValidation import *
 
 class MenuLogIn(Menu):
-    def __init__(self, GoodChain, username = "", password = "", error = ""):
+    def __init__(self, goodChain, username = "", password = "", error = ""):
         self.username = username
         self.password = password
         items = ["Username: " + self.username, "Password: " + len(self.password) * '*', "Log in", "Back"]
         functions = [self.set_username, self.set_password, self.log_in, self.back]
-        Menu.__init__(self, GoodChain, "Log in" + error, items, functions)
+        Menu.__init__(self, goodChain, "Log in" + error, items, functions)
 
     def set_username(self):
         unfiltered_username = input("Enter your username: ")
@@ -36,6 +35,7 @@ class MenuLogIn(Menu):
             self.goodChain.setMenu(MenuUser(self.goodChain))
     
     def back(self):
+        from MenuMain import MenuMain
         self.goodChain.setMenu(MenuMain(self.goodChain))
 
     def reload_menu(self, error = ""):

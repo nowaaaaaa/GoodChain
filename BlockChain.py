@@ -18,7 +18,12 @@ class CBlock:
         digest.update(bytes(str(self.previousHash),'utf8'))
         return digest.finalize()
 
+    # def mine(self, leading_zeros):
+    #     while not self.computeHash()[:leading_zeros] == b'\x00'*leading_zeros:
+    #         self.nonce += 1
+    #     self.hash = self.computeHash()
+
     def is_valid(self):
         if self.previousBlock == None:
             return True
-        return self.previousBlock.computeHash() == self.previousHash
+        return self.previousBlock.computeHash() == self.previousHash and self.previousBlock.is_valid()
