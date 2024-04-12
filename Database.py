@@ -60,6 +60,12 @@ class Database:
         """, (username, hash_password(password), prv, pub))
         self.connection.commit()
 
+    def get_public_key(self, username):
+        self.cursor.execute("""
+            SELECT public_key FROM users WHERE username = ?
+                            """, (username))
+        self.cursor.fetchone()
+
     def close(self):
         self.cursor.close()
         self.connection.close()

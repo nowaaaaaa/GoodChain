@@ -1,6 +1,6 @@
 from Signature import *
 
-class Tx:
+class Transaction:
     inputs = None
     outputs =None
     sigs = None
@@ -50,11 +50,16 @@ class Tx:
             if amount < 0:
                 return False
             total_out = total_out + amount
-
         if total_out > total_in:
-            return False
-        
+            return False        
         return True
+
+    def get_sender_output(self):
+        if not len(self.inputs) == 1:
+            return None
+        sender = self.inputs[0]
+        output = sum([amount for addr, amount in self.outputs])
+        return sender[1] - output
 
     def __gather(self):
         data=[]

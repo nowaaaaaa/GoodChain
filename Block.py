@@ -1,18 +1,19 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 
-class CBlock:
+class Block:
 
-    data = None
+    data = []
     previousHash = None
     previousBlock = None
+    nextBlock = None
     def __init__(self, data, previousBlock):
         self.data = data
         self.previousBlock = previousBlock
         if previousBlock != None:
             self.previousHash = previousBlock.computeHash()
     
-    def computeHash(self):
+    def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data),'utf8'))
         digest.update(bytes(str(self.previousHash),'utf8'))
@@ -26,4 +27,10 @@ class CBlock:
     def is_valid(self):
         if self.previousBlock == None:
             return True
-        return self.previousBlock.computeHash() == self.previousHash and self.previousBlock.is_valid()
+        for transaction in self.data:
+            if not transaction.is_valid():
+                return False
+        return self.previousBlock.compute_hash() == self.previousHash and self.previousBlock.is_valid()
+    
+    def add_tx(self, transaction):
+        self.data.append(transaction)
