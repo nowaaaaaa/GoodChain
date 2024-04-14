@@ -2,13 +2,14 @@ import sqlite3
 from Signature import *
 
 class Database:
+    path = './Data/users.sqlite'
     default_users = [
         ('mike111', 'mike111'),
         ('rose222', 'rose222'),
         ('alex333', 'alex333')
     ]
     def __init__(self):
-        self.connection = sqlite3.connect('./Data/users.sqlite')
+        self.connection = sqlite3.connect(self.path)
         self.cursor = self.connection.cursor()
         self.setup_tables()
         
@@ -39,7 +40,12 @@ class Database:
         self.cursor.execute("""
             SELECT * FROM users WHERE username = ? AND password_hash = ?
         """, (username, hash_password(password)))
-        return self.cursor.fetchone() or []
+        user_list = self.cursor.fetchone()
+        if user_list is None:
+            return []
+        else:
+            return [user_list[0], password, user_list[2], user_list[3]]
+
     
     def user_exists(self, username):
         self.cursor.execute("""
@@ -64,6 +70,12 @@ class Database:
         self.cursor.execute("""
             SELECT public_key FROM users WHERE username = ?
                             """, (username))
+        self.cursor.fetchone()
+
+    def get_username(self, public_key):
+        self.cursor.execute("""
+            SELECT username FROM users WHERE public_key = ?
+                            """, (public_key))
         self.cursor.fetchone()
 
     def close(self):

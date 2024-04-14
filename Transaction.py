@@ -68,6 +68,15 @@ class Transaction:
         data.append(self.reqd)
         return data
 
+    def add_reward(self, amount):
+        self.outputs.append((None, amount))
+    
+    def give_reward(self, addr):
+        for output in self.outputs:
+            if output[0] == None:
+                output = (addr, output[1])
+                break
+
     def __repr__(self):
         result = "INPUTS:\n"
         for addr, amt in self.inputs:

@@ -11,7 +11,7 @@ class Block:
         self.data = data
         self.previousBlock = previousBlock
         if previousBlock != None:
-            self.previousHash = previousBlock.computeHash()
+            self.previousHash = previousBlock.compute_hash()
     
     def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
@@ -22,7 +22,7 @@ class Block:
     # def mine(self, leading_zeros):
     #     while not self.computeHash()[:leading_zeros] == b'\x00'*leading_zeros:
     #         self.nonce += 1
-    #     self.hash = self.computeHash()
+    #     self.hash = self.compute_hash()
 
     def is_valid(self):
         if self.previousBlock == None:
