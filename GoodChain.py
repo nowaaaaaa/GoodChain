@@ -11,13 +11,8 @@ class GoodChain:
     def __init__(self):
         self.database = Database()
         self.last_block = None
-        # self.make_test_blocks()
         self.load_block()
-        for block in self.last_block.data:
-            print(block)
-        for block in self.last_block.previousBlock.data:
-            print(block)
-        # self.menu = MenuMain(self)
+        self.menu = MenuMain(self)
 
     def make_test_blocks(self):
         from Transaction import Transaction
