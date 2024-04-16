@@ -2,11 +2,12 @@ from Database import *
 from User import User
 from Menu import Menu
 from MenuMain import MenuMain
+from Pool import Pool
 import pickle
 
 class GoodChain:
     path = './Data/blockchain.dat'
-
+    messages = []
 
     def __init__(self):
         self.database = Database()
@@ -41,9 +42,15 @@ class GoodChain:
     
     def logIn(self, user_list):
         self.user = User(user_list)
+        pool = Pool()
+        for tx in pool.invalid:
+            if tx.ingoing[0] == self.user.public_key:
+                self.add_message("Invalid transaction removed from pool")
+                pool.remove_invalid(tx)
     
     def log_out(self):
         self.user = None
+        self.messages = []
 
     def setMenu(self, menu):
         self.menu = menu
@@ -56,8 +63,11 @@ class GoodChain:
     
     def save_block(self):
         pickle.dump(self.last_block, open(self.path, 'wb'))
-
-    def check_balance(self):
+    
+    def check_available(self):
+        return 0
+    
+    def check_pool(self):
         return 0
     
     def add_block(self, block):
@@ -66,3 +76,25 @@ class GoodChain:
         if self.last_block != None:
             self.last_block.nextBlock = block
         self.last_block = block
+    
+    def add_to_pool(self, tx):
+        pool = Pool()
+        pool.add_tx(tx)
+        pool.save_pool()
+    
+    def readable_transaction(self, tx):
+        result = ""
+        for addr, amt in tx.outputs:
+            result += f"{amt} to {addr}\n"
+        result += f"{tx.ingoing[1]} from {tx.ingoing[0]}\n"
+
+    def post_message(self, message):
+        self.messages.append(message)
+    
+    def get_messages(self):
+        res = self.messages.copy()
+        self.messages = []
+        return res
+    
+    def get_unconfirmed_transactions(self):
+        return []

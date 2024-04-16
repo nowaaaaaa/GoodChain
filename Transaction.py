@@ -13,6 +13,9 @@ class Transaction:
 
     def add_output(self, to_addr, amount):
         self.outputs.append((to_addr, amount))
+    
+    def set_reward(self, amount):
+        self.add_output((None, amount))
 
     def sign(self, private):
         message = self.__gather()
@@ -23,28 +26,21 @@ class Transaction:
         total_in = self.ingoing[1]
         total_out = 0
         message = self.__gather()
-        if not verify(message, self.sigs[0], addr):
+        if not verify(message, self.sigs[0], addr) and self.ingoing[0] != None:
             return False
         for addr,amount in self.outputs:
             if amount < 0:
                 return False
             total_out = total_out + amount
-        if total_out > total_in:
+        if total_out != total_in:
             return False        
         return True
-
-    def get_sender_output(self):
-        output = sum([amount for addr, amount in self.outputs])
-        return self.ingoing[1] - output
 
     def __gather(self):
         data=[]
         data.append(self.ingoing)
         data.append(self.outputs)
         return data
-
-    def add_reward(self, amount):
-        self.outputs.append((None, amount))
     
     def give_reward(self, addr):
         for output in self.outputs:

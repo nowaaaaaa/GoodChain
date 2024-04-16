@@ -7,14 +7,18 @@ class Pool:
         self.invalid = []
         self.load_pool()
 
-    # def load_pool(self):
-    #     try:
-    #         self.transactions = pickle.load(open(self.path, 'rb'))
-    #     except:
-    #         return
+    def load_pool(self):
+        try:
+            with open(self.path, 'rb') as f:
+                self.transactions = pickle.load(f)
+                self.invalid = pickle.load(f)
+        except:
+            return
     
-    # def save_pool(self):
-    #     pickle.dump(self.transactions, open(self.path, 'wb'))
+    def save_pool(self):
+        with open(self.path, 'wb') as f:
+            pickle.dump(self.transactions, f)
+            pickle.dump(self.invalid, f)
 
     def add_tx(self, tx):
         self.transactions.append(tx)
@@ -34,4 +38,8 @@ class Pool:
                 self.invalid.append(tx)
                 invalid += 1
         return result, invalid
+
+    def remove_invalid(self, tx):
+        self.invalid.remove(tx)
+        self.save_pool()
 
