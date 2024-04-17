@@ -46,8 +46,11 @@ class GoodChain:
         print("Welcome to GoodChain!")
         while self.menu:
             self.menu.show()
-        for tx in self.last_block.data:
-            print(self.readable_transaction(tx))
+        block = self.last_block
+        while block:
+            for tx in block.data:
+                print(self.readable_transaction(tx))
+            block = block.previous_block
     
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -86,7 +89,9 @@ class GoodChain:
         return amount     
 
     def check_pool(self):
-        return 0
+        public_key = self.user.public_key
+        pool = Pool()
+        return sum([tx.ingoing[1] for tx in pool.transactions if tx.ingoing[0] == public_key])
     
     def add_block(self, block):
         if block.previous_block != self.last_block:
@@ -103,8 +108,9 @@ class GoodChain:
     def readable_transaction(self, tx):
         result = ""
         for addr, amt in tx.outputs:
-            result += f"{amt} to {addr}\n"
-        result += f"{tx.ingoing[1]} from {tx.ingoing[0]}\n"
+            result += f"{amt} to {self.database.get_username(addr)}"
+        result += f"\n{tx.ingoing[1]} from {self.database.get_username(tx.ingoing[0])}"
+        return result
 
     def post_message(self, message):
         self.messages.append(message)
@@ -115,4 +121,14 @@ class GoodChain:
         return res
     
     def get_unconfirmed_transactions(self):
-        return []
+        tx = []
+        block = self.last_block
+        public_key = self.user.public_key
+        while block != None:
+            if block.is_validated():
+                for t in block.data:
+                    for addr, amt in t.outputs:
+                        if addr == public_key:
+                            tx.append(t)
+            block = block.previous_block
+        return tx

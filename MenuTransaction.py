@@ -27,7 +27,7 @@ class MenuTransaction(Menu):
     
     def confirm_transaction(self):
         output = sum([o[1] for o in self.transaction.outputs])
-        if self.goodChain.check_balance() < output:
+        if self.goodChain.check_available() < output:
             self.reload_menu("Insufficient balance")
             return
         self.transaction.set_input(self.goodChain.user.public_key, output)

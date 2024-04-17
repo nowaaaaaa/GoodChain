@@ -16,10 +16,11 @@ class MenuReceive(Menu):
 
     def confirm_transaction(self, tx):
         tx.sign(self.goodChain.user.get_private_key())
+        self.goodChain.save_block()
         self.reload_menu("Transaction received")
     
     def reload_menu(self, error = ""):
-        self.goodChain.set_menu(MenuReceive(self.goodChain, self.transaction, error))
+        self.goodChain.set_menu(MenuReceive(self.goodChain, error))
     
     def back(self):
         from MenuUser import MenuUser

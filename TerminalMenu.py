@@ -20,9 +20,9 @@ class TerminalMenu:
             print(self.title)
             for i, item in enumerate(self.items):
                 if i == self.selected_index:
-                    print(Back.WHITE + self.menu_cursor + ' ' + item + Style.RESET_ALL)
+                    print(Back.WHITE + self.menu_cursor + ' ' + item.replace("\n", "\n  ") + Style.RESET_ALL)
                 else:
-                    print(' ' + item)
+                    print(' ' + item.replace("\n", "\n "))
             sleep(0.2)
             while True:
                 key = keyboard.read_key(suppress=True)

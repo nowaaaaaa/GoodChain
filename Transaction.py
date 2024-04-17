@@ -63,10 +63,16 @@ class Transaction:
     def get_net_gain(self, addr):
         net = 0
         for a, amt in self.outputs:
-            if a == addr:
+            if a == addr and self.sig_found(addr):
                 net += amt
         if self.ingoing[0] == addr:
             net -= self.ingoing[1]
         from Database import Database
         print(f"Net gain for {addr} is {net}")
         return net
+    
+    def sig_found(self, addr):
+        for sig in self.sigs:
+            if verify(self.__gather(), sig, addr):
+                return True
+        return False

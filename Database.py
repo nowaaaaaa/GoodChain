@@ -69,14 +69,14 @@ class Database:
     def get_public_key(self, username):
         self.cursor.execute("""
             SELECT public_key FROM users WHERE username = ?
-                            """, (username))
-        self.cursor.fetchone()
+                            """, (username,))
+        return self.cursor.fetchone()[0]
 
     def get_username(self, public_key):
         self.cursor.execute("""
             SELECT username FROM users WHERE public_key = ?
-                            """, (public_key))
-        self.cursor.fetchone()
+                            """, (public_key,))
+        return self.cursor.fetchone()[0]
 
     def close(self):
         self.cursor.close()
