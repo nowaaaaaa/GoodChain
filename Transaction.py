@@ -26,7 +26,7 @@ class Transaction:
         total_in = self.ingoing[1]
         total_out = 0
         message = self.__gather()
-        if not verify(message, self.sigs[0], addr) and self.ingoing[0] != None:
+        if self.ingoing[0] != None and not verify(message, self.sigs[0], self.ingoing[0]):
             return False
         for addr,amount in self.outputs:
             if amount < 0:
@@ -50,7 +50,7 @@ class Transaction:
 
     def __repr__(self):
         result = "INPUT:\n"
-        result += str(amt) + " from " + str(addr) + "\n"
+        result += str(self.ingoing[1]) + " from " + str(self.ingoing[0]) + "\n"
         result += "OUTPUTS:\n"
         for addr, amt in self.outputs:
             result += str(amt) + " to " + str(addr) + "\n"
@@ -59,3 +59,14 @@ class Transaction:
             result += str(s) + "\n"
         result += "END"
         return result
+    
+    def get_net_gain(self, addr):
+        net = 0
+        for a, amt in self.outputs:
+            if a == addr:
+                net += amt
+        if self.ingoing[0] == addr:
+            net -= self.ingoing[1]
+        from Database import Database
+        print(f"Net gain for {addr} is {net}")
+        return net

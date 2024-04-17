@@ -34,12 +34,12 @@ class MenuSignUp(Menu):
             self.reload_menu("\nPlease enter a valid username and password")
             return
         self.goodChain.database.add_user(self.username, self.password)
-        self.goodChain.logIn(self.goodChain.database.verify_user(self.username, self.password))
-        self.goodChain.setMenu(MenuUser(self.goodChain))
+        self.goodChain.log_in(self.goodChain.database.verify_user(self.username, self.password))
+        self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def back(self):
         from MenuMain import MenuMain
-        self.goodChain.setMenu(MenuMain(self.goodChain))
+        self.goodChain.set_menu(MenuMain(self.goodChain))
 
     def reload_menu(self, error = ""):
-        self.goodChain.setMenu(MenuSignUp(self.goodChain, self.username, self.password, error))
+        self.goodChain.set_menu(MenuSignUp(self.goodChain, self.username, self.password, error))

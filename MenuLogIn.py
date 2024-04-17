@@ -31,14 +31,14 @@ class MenuLogIn(Menu):
         if user == []:
             self.reload_menu("\nIncorrect username or password")
         else:
-            self.goodChain.logIn(user)
-            self.goodChain.setMenu(MenuUser(self.goodChain))
+            self.goodChain.log_in(user)
+            self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def back(self):
         from MenuMain import MenuMain
-        self.goodChain.setMenu(MenuMain(self.goodChain))
+        self.goodChain.set_menu(MenuMain(self.goodChain))
 
     def reload_menu(self, error = ""):
-        self.goodChain.setMenu(MenuLogIn(self.goodChain, self.username, self.password, error))
+        self.goodChain.set_menu(MenuLogIn(self.goodChain, self.username, self.password, error))
 
 

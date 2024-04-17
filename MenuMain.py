@@ -10,15 +10,15 @@ class MenuMain(Menu):
         Menu.__init__(self, goodChain, "GoodChain Main Menu", items, functions)
 
     def signUp(self):
-        self.goodChain.setMenu(MenuSignUp(self.goodChain))
+        self.goodChain.set_menu(MenuSignUp(self.goodChain))
 
     def logIn(self):
-        self.goodChain.setMenu(MenuLogIn(self.goodChain))
+        self.goodChain.set_menu(MenuLogIn(self.goodChain))
 
     def explore(self):
-        self.goodChain.setMenu(MenuMain(self.goodChain))
+        self.goodChain.set_menu(MenuMain(self.goodChain))
 
     def exit(self):
-        self.goodChain.setMenu(None)
+        self.goodChain.set_menu(None)
 
         

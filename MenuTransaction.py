@@ -12,7 +12,7 @@ class MenuTransaction(Menu):
         for i in range(len(self.transaction.outputs)):
             items.append(f"{goodChain.database.get_username(self.transaction.outputs[i][0])} receives {self.transaction.outputs[i][1]} coins")
             functions.append(lambda : self.remove_output(i))
-        title =  "Setting up a transaction, available balance: " + str(self.goodChain.check_available()) + " coins"
+        title =  "Setting up a transaction, available balance: " + str(goodChain.check_available(goodChain.user.public_key)) + " coins"
         if error != "":
             title += '\n' + error
         items.append("Confirm transaction")
@@ -23,7 +23,7 @@ class MenuTransaction(Menu):
     
     def back(self):
         from MenuUser import MenuUser
-        self.goodChain.setMenu(MenuUser(self.goodChain))
+        self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def confirm_transaction(self):
         output = sum([o[1] for o in self.transaction.outputs])
@@ -40,7 +40,7 @@ class MenuTransaction(Menu):
             self.goodChain.add_to_pool(self.transaction)
             self.goodChain.add_message("Transaction was added to pool")
             from MenuUser import MenuUser
-            self.goodChain.setMenu(MenuUser(self.goodChain))
+            self.goodChain.set_menu(MenuUser(self.goodChain))
         else:
             self.reload_menu()
 
@@ -51,5 +51,5 @@ class MenuTransaction(Menu):
         self.reload_menu()
 
     def reload_menu(self, error = ""):
-        self.goodChain.setMenu(MenuTransaction(self.goodChain, self.transaction, error))
+        self.goodChain.set_menu(MenuTransaction(self.goodChain, self.transaction, error))
     

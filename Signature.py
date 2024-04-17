@@ -1,4 +1,4 @@
-# from cryptography.exceptions import *
+from cryptography.exceptions import *
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -24,6 +24,7 @@ def sign(message, private_key):
 
 def verify(message, signature, pbc_ser):
     message = bytes(str(message), 'utf-8')
+    print(pbc_ser)
     public_key = serialization.load_pem_public_key(pbc_ser)
     try:
         public_key.verify(

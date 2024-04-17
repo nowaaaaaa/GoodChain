@@ -19,8 +19,8 @@ class MenuReceive(Menu):
         self.reload_menu("Transaction received")
     
     def reload_menu(self, error = ""):
-        self.goodChain.setMenu(MenuReceive(self.goodChain, self.transaction, error))
+        self.goodChain.set_menu(MenuReceive(self.goodChain, self.transaction, error))
     
     def back(self):
         from MenuUser import MenuUser
-        self.goodChain.setMenu(MenuUser(self.goodChain))
+        self.goodChain.set_menu(MenuUser(self.goodChain))

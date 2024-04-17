@@ -12,35 +12,44 @@ class GoodChain:
     def __init__(self):
         self.database = Database()
         self.last_block = None
+        self.make_test_blocks()
         self.load_block()
         self.menu = MenuMain(self)
 
     def make_test_blocks(self):
         from Transaction import Transaction
         tx = Transaction()
-        tx.add_input('mike111', 1)
-        tx.add_output('rose222', 1)
-        tx.sign(User(self.database.verify_user('mike111', 'mike111')).get_private_key())
+        mike = User(self.database.verify_user('mike111', 'mike111'))
+        rose = User(self.database.verify_user('rose222', 'rose222'))
+        alex = User(self.database.verify_user('alex333', 'alex333'))
+        tx.set_input(mike.public_key, 1)
+        tx.add_output(rose.public_key, 1)
+        tx.sign(mike.get_private_key())
         from Block import Block
         self.add_block(Block([], None))
         self.last_block.add_tx(tx)
+        self.last_block.validate_block(mike.get_private_key(), mike.public_key)
+        self.last_block.validate_block(rose.get_private_key(), rose.public_key)
+        self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.add_block(Block([], self.last_block))
         tx = Transaction()
-        tx.add_input('rose222', 1)
-        tx.add_output('alex333', 1)
-        tx.sign(User(self.database.verify_user('rose222', 'rose222')).get_private_key())
+        tx.set_input(rose.public_key, 1)
+        tx.add_output(alex.public_key, 1)
+        tx.sign(rose.get_private_key())
         self.last_block.add_tx(tx)
+        self.last_block.validate_block(mike.get_private_key(), mike.public_key)
+        self.last_block.validate_block(rose.get_private_key(), rose.public_key)
+        self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.save_block()
 
     def run(self):
         print("Welcome to GoodChain!")
         while self.menu:
             self.menu.show()
-        # self.database.cursor.execute("SELECT * FROM users")
-        # for data in self.database.verify_user('mike111', 'mike111'):
-        #     print(data)
+        for tx in self.last_block.data:
+            print(self.readable_transaction(tx))
     
-    def logIn(self, user_list):
+    def log_in(self, user_list):
         self.user = User(user_list)
         pool = Pool()
         for tx in pool.invalid:
@@ -52,7 +61,7 @@ class GoodChain:
         self.user = None
         self.messages = []
 
-    def setMenu(self, menu):
+    def set_menu(self, menu):
         self.menu = menu
     
     def load_block(self):
@@ -64,17 +73,26 @@ class GoodChain:
     def save_block(self):
         pickle.dump(self.last_block, open(self.path, 'wb'))
     
-    def check_available(self):
-        return 0
-    
+    def check_available(self, public_key, starting_block = None):
+        from Transaction import Transaction
+        if starting_block == None:
+            if self.last_block == None:
+                return 0
+            starting_block = self.last_block
+        amount = 0 if starting_block.previous_block == None else self.check_available(public_key, starting_block.previous_block)
+        if starting_block.is_validated():
+            for tx in starting_block.data:
+                amount += tx.get_net_gain(public_key)
+        return amount     
+
     def check_pool(self):
         return 0
     
     def add_block(self, block):
-        if block.previousBlock != self.last_block:
+        if block.previous_block != self.last_block:
             return
         if self.last_block != None:
-            self.last_block.nextBlock = block
+            self.last_block.next_block = block
         self.last_block = block
     
     def add_to_pool(self, tx):
