@@ -12,7 +12,7 @@ class GoodChain:
     def __init__(self):
         self.database = Database()
         self.last_block = None
-        self.make_test_blocks()
+        # self.make_test_blocks()
         self.load_block()
         self.menu = MenuMain(self)
 
@@ -60,6 +60,13 @@ class GoodChain:
                 self.add_message("Invalid transaction removed from pool")
                 pool.remove_invalid(tx)
     
+    def reward_sign_up(self):
+        from Transaction import Transaction
+        tx = Transaction()
+        tx.set_input(None, 50)
+        tx.add_output(self.user.public_key, 50)
+        self.add_to_pool(tx)
+
     def log_out(self):
         self.user = None
         self.messages = []
@@ -76,17 +83,20 @@ class GoodChain:
     def save_block(self):
         pickle.dump(self.last_block, open(self.path, 'wb'))
     
-    def check_available(self, public_key, starting_block = None):
+    def check_balance(self, public_key, starting_block = None):
         from Transaction import Transaction
         if starting_block == None:
             if self.last_block == None:
                 return 0
             starting_block = self.last_block
-        amount = 0 if starting_block.previous_block == None else self.check_available(public_key, starting_block.previous_block)
+        amount = 0 if starting_block.previous_block == None else self.check_balance(public_key, starting_block.previous_block)
         if starting_block.is_validated():
             for tx in starting_block.data:
                 amount += tx.get_net_gain(public_key)
-        return amount     
+        return amount  
+    
+    def check_available(self, public_key):
+        return self.check_balance(public_key) - self.check_pool()
 
     def check_pool(self):
         public_key = self.user.public_key
@@ -131,4 +141,27 @@ class GoodChain:
                         if addr == public_key:
                             tx.append(t)
             block = block.previous_block
+        return tx
+    
+    def can_mine(self):
+        if self.last_block != None and not self.last_block.is_validated():
+            self.post_message("The last block has not yet been validated.")
+            return False
+        if len(Pool().transactions) >= 4:
+            return True
+        self.post_message("There are not enough valid transactions in the pool to mine a block.")
+        return False
+    
+    def get_mandatory_transactions(self):
+        pool = Pool()
+        tx, invalid = pool.get_mandatory()
+        if invalid > 0:
+            self.post_message(f"Removed {invalid} invalid transactions from the pool")
+        return tx
+    
+    def get_optional_transactions(self):
+        pool = Pool()
+        tx, invalid = pool.get_optional()
+        if invalid > 0:
+            self.post_message(f"Removed {invalid} invalid transactions from the pool")
         return tx

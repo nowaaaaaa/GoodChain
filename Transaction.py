@@ -1,4 +1,5 @@
 from Signature import *
+from uuid import *
 
 class Transaction:
     ingoing = None
@@ -7,6 +8,7 @@ class Transaction:
     def __init__(self):
         self.outputs = []
         self.sigs = []
+        self.id = uuid4()
 
     def set_input(self, from_addr, amount):
         self.ingoing = (from_addr, amount)
@@ -15,6 +17,10 @@ class Transaction:
         self.outputs.append((to_addr, amount))
     
     def set_reward(self, amount):
+        for output in self.outputs:
+            if output[0] == None:
+                output = (None, amount)
+                return
         self.add_output((None, amount))
 
     def sign(self, private):
@@ -42,11 +48,11 @@ class Transaction:
         data.append(self.outputs)
         return data
     
-    def give_reward(self, addr):
-        for output in self.outputs:
-            if output[0] == None:
-                output = (addr, output[1])
-                break
+    def get_reward(self):
+        for addr, amt in self.outputs:
+            if addr == None:
+                return amt
+        return 0
 
     def __repr__(self):
         result = "INPUT:\n"
@@ -76,3 +82,14 @@ class Transaction:
             if verify(self.__gather(), sig, addr):
                 return True
         return False
+
+    def __eq__(self, other):
+        if self.ingoing[0] != other.ingoing[0] or self.ingoing[1] != other.ingoing[1]:
+            return False
+        for i in range(len(self.outputs)):
+            if self.outputs[i][0] != other.outputs[i][0] or self.outputs[i][1] != other.outputs[i][1]:
+                return False
+        for i in range(len(self.sigs)):
+            if self.sigs[i] != other.sigs[i]:
+                return False
+        return self.id == other.id

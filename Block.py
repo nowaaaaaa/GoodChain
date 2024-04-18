@@ -31,11 +31,22 @@ class Block:
     def is_valid(self):
         if self.previous_block == None:
             return True
+        if not self.verify_reward():
+            return False
         for transaction in self.data:
             if not transaction.is_valid():
                 return False
         return self.previous_block.compute_hash() == self.previous_hash and self.previous_block.is_valid()
     
+    def verify_reward(self):
+        reward = 50
+        actual = 0
+        for tx in self.data:
+            if tx.ingoing[0] == None:
+                actual = tx.ingoing[1]
+            reward += tx.get_reward()
+        return reward == actual
+
     def add_tx(self, transaction):
         self.data.append(transaction)
     

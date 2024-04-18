@@ -38,7 +38,18 @@ class Pool:
                 self.invalid.append(tx)
                 invalid += 1
         return result, invalid
-
+    
+    def get_optional(self):
+        tx = self.transactions[4:]
+        res = []
+        for t in tx:
+            if t.is_valid():
+                res.append(t)
+            else:
+                self.transactions.remove(t)
+                self.invalid.append(t)
+        return res, len(tx) - len(res)
+    
     def remove_invalid(self, tx):
         self.invalid.remove(tx)
         self.save_pool()

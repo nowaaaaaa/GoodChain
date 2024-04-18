@@ -6,13 +6,13 @@ from MenuLogIn import *
 class MenuMain(Menu):
     def __init__(self, goodChain):
         items = ["Sign Up", "Log In", "Explore the blockchain", "Exit"]
-        functions = [self.signUp, self.logIn, self.explore, self.exit]
+        functions = [self.sign_up, self.log_in, self.explore, self.exit]
         Menu.__init__(self, goodChain, "GoodChain Main Menu", items, functions)
 
-    def signUp(self):
+    def sign_up(self):
         self.goodChain.set_menu(MenuSignUp(self.goodChain))
 
-    def logIn(self):
+    def log_in(self):
         self.goodChain.set_menu(MenuLogIn(self.goodChain))
 
     def explore(self):

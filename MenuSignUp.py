@@ -35,6 +35,7 @@ class MenuSignUp(Menu):
             return
         self.goodChain.database.add_user(self.username, self.password)
         self.goodChain.log_in(self.goodChain.database.verify_user(self.username, self.password))
+        self.goodChain.reward_sign_up()
         self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def back(self):

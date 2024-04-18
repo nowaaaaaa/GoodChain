@@ -17,6 +17,8 @@ class MenuTransaction(Menu):
             title += '\n' + error
         items.append("Add output")
         functions.append(self.add_output)
+        items.append("Set mining reward, currently: " + str(self.transaction.get_reward()) + " coins")
+        functions.append(self.set_reward)
         items.append("Confirm transaction")
         functions.append(self.confirm_transaction)
         items.append("Back")
@@ -42,6 +44,14 @@ class MenuTransaction(Menu):
             self.reload_menu("Invalid amount entered")
             return
         self.transaction.add_output(addr, int(amount))
+        self.reload_menu()
+
+    def set_reward(self):
+        amount = input(f"Enter mining reward amount: ")
+        if not amount.isdigit() or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
+            self.reload_menu("Invalid amount entered")
+            return
+        self.transaction.set_reward(int(amount))
         self.reload_menu()
 
     def back(self):

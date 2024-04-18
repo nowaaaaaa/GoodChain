@@ -20,8 +20,12 @@ class MenuUser(Menu):
         self.goodChain.set_menu(MenuReceive(self.goodChain))
 
     def mine_block(self):
-        self.goodChain.set_menu(MenuUser(self.goodChain))
-    
+        from MenuMine import MenuMine
+        if self.goodChain.can_mine():
+            self.goodChain.set_menu(MenuMine(self.goodChain))
+        else:
+            self.goodChain.set_menu(MenuUser(self.goodChain))
+
     def log_out(self):
         from MenuMain import MenuMain
         self.goodChain.log_out()
