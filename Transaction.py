@@ -63,7 +63,7 @@ class Transaction:
     def get_net_gain(self, addr):
         net = 0
         for a, amt in self.outputs:
-            if a == addr and self.sig_found(addr):
+            if a == addr:
                 net += amt
         if self.ingoing[0] == addr:
             net -= self.ingoing[1]

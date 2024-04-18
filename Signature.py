@@ -24,7 +24,6 @@ def sign(message, private_key):
 
 def verify(message, signature, pbc_ser):
     message = bytes(str(message), 'utf-8')
-    print(pbc_ser)
     public_key = serialization.load_pem_public_key(pbc_ser)
     try:
         public_key.verify(
