@@ -70,13 +70,16 @@ class Database:
         self.cursor.execute("""
             SELECT public_key FROM users WHERE username = ?
                             """, (username,))
-        return self.cursor.fetchone()[0]
-
+        result = self.cursor.fetchone()
+        return result[0] if result else None
+    
     def get_username(self, public_key):
         self.cursor.execute("""
             SELECT username FROM users WHERE public_key = ?
                             """, (public_key,))
-        return self.cursor.fetchone()[0]
+        result = self.cursor.fetchone()
+        return result[0] if result else None
+
 
     def close(self):
         self.cursor.close()

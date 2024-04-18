@@ -15,19 +15,45 @@ class MenuTransaction(Menu):
         title =  "Setting up a transaction, available balance: " + str(goodChain.check_available(goodChain.user.public_key)) + " coins"
         if error != "":
             title += '\n' + error
+        items.append("Add output")
+        functions.append(self.add_output)
         items.append("Confirm transaction")
         functions.append(self.confirm_transaction)
         items.append("Back")
         functions.append(self.back)
         Menu.__init__(self, goodChain, title, items, functions) 
     
+    def add_output(self):
+        raw_addr = input("Enter the address or username of the recipient: ")
+        addr = None
+        username = None
+        if self.goodChain.database.get_username(raw_addr) == None:
+            if self.goodChain.database.get_public_key(raw_addr) == None:
+                self.reload_menu("Invalid address or username")
+                return
+            else:
+                addr = self.goodChain.database.get_public_key(raw_addr)
+                username = raw_addr
+        else:
+            addr = raw_addr
+            username = self.goodChain.database.get_username(raw_addr)
+        amount = input(f"Enter the amount to send to {username}: ")
+        if not amount.isdigit() or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
+            self.reload_menu("Invalid amount entered")
+            return
+        self.transaction.add_output(addr, int(amount))
+        self.reload_menu()
+
     def back(self):
         from MenuUser import MenuUser
         self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def confirm_transaction(self):
+        if len(self.transaction.outputs) <= 0:
+            self.reload_menu("No outputs specified")
+            return
         output = sum([o[1] for o in self.transaction.outputs])
-        if self.goodChain.check_available() < output:
+        if self.goodChain.check_available(self.goodChain.user.public_key) < output:
             self.reload_menu("Insufficient balance")
             return
         self.transaction.set_input(self.goodChain.user.public_key, output)
@@ -36,9 +62,9 @@ class MenuTransaction(Menu):
             self.reload_menu("Invalid signature or output")
             return
         from MenuConfirm import MenuConfirm
-        if (MenuConfirm("Please confirm you want to make this transaction:\n" + self.goodChain.readable_transaction(self.transaction).show())):
+        if (MenuConfirm("Please confirm you want to make this transaction:\n" + self.goodChain.readable_transaction(self.transaction)).show()):
             self.goodChain.add_to_pool(self.transaction)
-            self.goodChain.add_message("Transaction was added to pool")
+            self.goodChain.post_message("Transaction was added to pool")
             from MenuUser import MenuUser
             self.goodChain.set_menu(MenuUser(self.goodChain))
         else:
@@ -52,4 +78,7 @@ class MenuTransaction(Menu):
 
     def reload_menu(self, error = ""):
         self.goodChain.set_menu(MenuTransaction(self.goodChain, self.transaction, error))
+    
+    def get_total_output(self):
+        return sum([o[1] for o in self.transaction.outputs])
     
