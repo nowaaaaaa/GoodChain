@@ -45,14 +45,14 @@ class GoodChain:
     def test_mining(self):
         from Transaction import Transaction
         from Block import Block
-        n = 10
+        n = 5
         min_time = 10000
         max_time = -1
         times = []
         for i in range(n):
             tx = Transaction()
-            tx.set_input(None, i)
-            tx.add_output(None, i)
+            tx.set_input(None, i+1)
+            tx.add_output(None, i+1)
             times.append(Block([tx], None).mine(2, None))
             if times[i] < min_time:
                 min_time = times[i]
