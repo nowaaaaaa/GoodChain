@@ -13,13 +13,15 @@ class Block:
     miner = None
     mine_time = None
     nonce = 0
+    block_id = 0
 
     def __init__(self, data, previous_block):
         self.data = data
         self.previous_block = previous_block
         if previous_block != None:
             self.previous_hash = previous_block.compute_hash()
-    
+            self.block_id = previous_block.block_id + 1
+
     def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data),'utf8'))
@@ -30,14 +32,16 @@ class Block:
 # 3 = Min time: 10.49948763847351, Max time: 177.64776468276978, Average time: 89.72544753551483
 # 2, 1000000 = Min time: 10.516226768493652, Max time: 16.234838247299194, Average time: 14.786657094955444
 # 2, 300000 = Min time: 5.411425352096558, Max time: 22.437660455703735, Average time: 12.940696859359742
+# 2, 1000000 (+1) = Min time: 4.336809873580933, Max time: 16.184622764587402, Average time: 11.672398400306701
+# 2, 1300000 (+1) = Min time: 4.279385328292847, Max time: 18.343408823013306, Average time: 14.090123772621155
     def mine(self, leading_zeros, public_key):
         from time import time
         start = time()
         computed = self.compute_hash()
-        while not computed[:leading_zeros] == b'\x00'*leading_zeros or int(computed[leading_zeros]) > 0+(self.nonce//300000):
+        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//130000)):
             self.nonce += 1
             computed = self.compute_hash()
-        print(f"Block mined: {str(computed[leading_zeros])} {0+(self.nonce//300000)} {self.nonce} {self.compute_hash()}")
+        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//130000))} {self.nonce} {self.compute_hash()}")
         end = time()
         self.miner = public_key
         self.mine_time = datetime.now()
@@ -66,10 +70,18 @@ class Block:
         self.data.append(transaction)
     
     def validate_block(self, private_key, public_key):
+        if self.validated_by(public_key):
+            return False
         if self.is_valid():
             self.sigs.append((sign(self.compute_hash(), private_key), public_key))
             return True
     
+    def validated_by(self, public_key):
+        for sig, key in self.sigs:
+            if key == public_key:
+                return True
+        return False
+
     def is_validated(self):
         count = 0
         for sig, public_key in self.sigs:

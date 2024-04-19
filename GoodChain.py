@@ -8,6 +8,7 @@ import pickle
 class GoodChain:
     path = './Data/blockchain.dat'
     messages = []
+    user = None
 
     def __init__(self):
         self.database = Database()
@@ -45,14 +46,14 @@ class GoodChain:
     def test_mining(self):
         from Transaction import Transaction
         from Block import Block
-        n = 5
+        n = 10
         min_time = 10000
         max_time = -1
         times = []
         for i in range(n):
             tx = Transaction()
             tx.set_input(None, i+1)
-            tx.add_output(None, i+1)
+            tx.add_output(None, i)
             times.append(Block([tx], None).mine(2, None))
             if times[i] < min_time:
                 min_time = times[i]
@@ -61,15 +62,14 @@ class GoodChain:
         print(f"Min time: {min_time}, Max time: {max_time}, Average time: {sum(times)/n}")
 
     def run(self):
-        print("Welcome to GoodChain!")
         while self.menu:
             self.menu.show()
-        block = self.last_block
-        while block:
-            for tx in block.data:
-                print(self.readable_transaction(tx))
-            block = block.previous_block
-        self.test_mining()
+        # block = self.last_block
+        # while block:
+        #     for tx in block.data:
+        #         print(self.readable_transaction(tx))
+        #     block = block.previous_block
+        # self.test_mining()
     
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -168,7 +168,7 @@ class GoodChain:
             return False
         if len(Pool().transactions) >= 4:
             from datetime import datetime
-            if self.last_block != None and (datetime.now() - self.last_block.mine_time).total_minutes() < 3:
+            if self.last_block != None and (datetime.now() - self.last_block.mine_time).total_seconds() < 180:
                 self.post_message("You must wait at least 3 minutes after the last block was mined.")
                 return False
             return True
@@ -203,12 +203,33 @@ class GoodChain:
         if not block.is_valid():
             self.post_message("Tried to mine an invalid block.")
             return
-        time = block.mine(3, self.user.public_key)
+        time = block.mine(2, self.user.public_key)
         self.add_block(block)
         self.save_block()
+        self.load_block()
+        for tx in transactions:
+            self.remove_from_pool(tx)
         self.post_message(f"Block successfully mined in {time} seconds.")
     
     def remove_from_pool(self, tx):
         pool = Pool()
-        pool.remove(tx)
+        try:
+            pool.remove(tx)
+        except:
+            print("Unable to remove transaction: not in pool.")
         pool.save_pool()
+    
+    def validate_block(self, id):
+        block = self.last_block
+        while block != None and block.block_id != id:
+            block = block.previous_block
+        block.validate_block(self.user.get_private_key(), self.user.public_key)
+        for s in self.last_block.sigs:
+            print(s[1])
+        self.save_block()
+        self.load_block()
+        for s in self.last_block.sigs:
+            print(s[1])
+        while block != None and block.block_id != id:
+            block = block.previous_block
+        return block

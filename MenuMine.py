@@ -2,7 +2,7 @@ from Menu import *
 from colorama import Fore, Back, Style
 
 class MenuMine(Menu):
-    def __init__(self, goodChain, transactions = [], error = ""):
+    def __init__(self, goodChain, transactions = [], error = "", selected_index = 0):
         self.goodChain = goodChain
         if transactions == []:
             transactions = goodChain.get_mandatory_transactions()
@@ -30,6 +30,7 @@ class MenuMine(Menu):
         #         items.append(self.display_transaction(tx))            
         #     functions.append(lambda tx=tx : self.toggle_transaction(tx))
         Menu.__init__(self, goodChain, title, items, functions)
+        self.terminal_menu.selected_index = selected_index
 
     def toggle_transaction(self, tx):
         if tx in self.transactions:
@@ -66,4 +67,4 @@ class MenuMine(Menu):
         return f"{tx.ingoing[1]} from {self.goodChain.database.get_username(tx.ingoing[0])} to {self.goodChain.database.get_username(tx.outputs[0][0])}, reward: {tx.get_reward()}"
     
     def reload_menu(self, error = ""):
-        self.goodChain.set_menu(MenuMine(self.goodChain, self.transactions, error))
+        self.goodChain.set_menu(MenuMine(self.goodChain, self.transactions, error, self.terminal_menu.selected_index))

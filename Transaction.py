@@ -21,7 +21,7 @@ class Transaction:
             if output[0] == None:
                 output = (None, amount)
                 return
-        self.add_output((None, amount))
+        self.add_output(None, amount)
 
     def sign(self, private):
         message = self.__gather()
@@ -73,8 +73,6 @@ class Transaction:
                 net += amt
         if self.ingoing[0] == addr:
             net -= self.ingoing[1]
-        from Database import Database
-        print(f"Net gain for {addr} is {net}")
         return net
     
     def sig_found(self, addr):
@@ -84,6 +82,14 @@ class Transaction:
         return False
 
     def __eq__(self, other):
+        if self is None and other is None:
+            return True
+        if self is None or other is None:
+            return False
+        if self.ingoing == None and other.ingoing == None and self.outputs == None and other.outputs == None and self.sigs == None and other.sigs == None:
+            return True
+        if self.ingoing == None or other.ingoing == None or self.outputs == None or other.outputs == None or self.sigs == None or other.sigs == None or self.id == None or other.id == None:
+            return False
         if self.ingoing[0] != other.ingoing[0] or self.ingoing[1] != other.ingoing[1]:
             return False
         for i in range(len(self.outputs)):

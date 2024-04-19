@@ -1,7 +1,7 @@
 from Menu import *
 from MenuSignUp import *
 from MenuLogIn import *
-
+from MenuExplore import *
 
 class MenuMain(Menu):
     def __init__(self, goodChain):
@@ -16,7 +16,7 @@ class MenuMain(Menu):
         self.goodChain.set_menu(MenuLogIn(self.goodChain))
 
     def explore(self):
-        self.goodChain.set_menu(MenuMain(self.goodChain))
+        self.goodChain.set_menu(MenuExplore(self.goodChain))
 
     def exit(self):
         self.goodChain.set_menu(None)

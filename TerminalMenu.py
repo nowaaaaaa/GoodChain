@@ -16,7 +16,7 @@ class TerminalMenu:
 
     def show(self):
         while True:
-            self.clear()
+            # self.clear()
             print(self.title)
             for i, item in enumerate(self.items):
                 if i == self.selected_index:
