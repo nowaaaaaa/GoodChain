@@ -29,6 +29,9 @@ class MenuTransaction(Menu):
         raw_addr = input("Enter the address or username of the recipient: ")
         addr = None
         username = None
+        if self.goodChain.user.username == raw_addr or self.goodChain.user.public_key == raw_addr:
+            self.reload_menu("Cannot send to yourself")
+            return
         if self.goodChain.database.get_username(raw_addr) == None:
             if self.goodChain.database.get_public_key(raw_addr) == None:
                 self.reload_menu("Invalid address or username")

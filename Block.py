@@ -5,22 +5,21 @@ from datetime import datetime
 
 class Block:
 
-    data = []
-    previous_hash = None
-    previous_block = None
-    next_block = None
-    sigs = []
-    miner = None
-    mine_time = None
-    nonce = 0
-    block_id = 0
-
     def __init__(self, data, previous_block):
         self.data = data
         self.previous_block = previous_block
+        self.block_id = 0
         if previous_block != None:
             self.previous_hash = previous_block.compute_hash()
             self.block_id = previous_block.block_id + 1
+        else:
+            self.previous_hash = None
+        self.next_block = None
+        self.sigs = []
+        self.miner = None
+        self.mine_time = None
+        self.nonce = 0
+
 
     def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
@@ -38,11 +37,11 @@ class Block:
         from time import time
         start = time()
         computed = self.compute_hash()
-        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//130000)):
+        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//400000)):
             self.nonce += 1
             computed = self.compute_hash()
-        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//130000))} {self.nonce} {self.compute_hash()}")
         end = time()
+        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//400000))} {self.nonce} {self.compute_hash()}")
         self.miner = public_key
         self.mine_time = datetime.now()
         return end - start

@@ -50,11 +50,15 @@ class GoodChain:
         min_time = 10000
         max_time = -1
         times = []
+        user1 = User(self.database.verify_user('mike111', 'mike111'))
+        user2 = User(self.database.verify_user('rose222', 'rose222'))
+        user3 = User(self.database.verify_user('alex333', 'alex333'))
         for i in range(n):
             tx = Transaction()
-            tx.set_input(None, i+1)
-            tx.add_output(None, i)
-            times.append(Block([tx], None).mine(2, None))
+            for j in range(5):
+                tx.set_input(user1.public_key, i+1)
+                tx.add_output(user2.public_key, i)
+            times.append(Block([tx], self.last_block).mine(2, user3.public_key))
             if times[i] < min_time:
                 min_time = times[i]
             if times[i] > max_time:
@@ -62,14 +66,9 @@ class GoodChain:
         print(f"Min time: {min_time}, Max time: {max_time}, Average time: {sum(times)/n}")
 
     def run(self):
-        while self.menu:
-            self.menu.show()
-        # block = self.last_block
-        # while block:
-        #     for tx in block.data:
-        #         print(self.readable_transaction(tx))
-        #     block = block.previous_block
-        # self.test_mining()
+        # while self.menu:
+        #     self.menu.show()
+        self.test_mining()
     
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -214,9 +213,9 @@ class GoodChain:
     def remove_from_pool(self, tx):
         pool = Pool()
         try:
-            pool.remove(tx)
+            pool.transactions.remove(tx)
         except:
-            print("Unable to remove transaction: not in pool.")
+            pass
         pool.save_pool()
     
     def validate_block(self, id):

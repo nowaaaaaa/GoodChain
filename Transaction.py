@@ -2,9 +2,6 @@ from Signature import *
 from uuid import *
 
 class Transaction:
-    ingoing = None
-    outputs = None
-    sigs = None
     def __init__(self):
         self.outputs = []
         self.sigs = []
