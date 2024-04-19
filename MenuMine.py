@@ -23,12 +23,12 @@ class MenuMine(Menu):
         functions.append(self.mine_block)
         items.append("Back")
         functions.append(self.back)
-        for tx in self.transactions:
-            if tx in self.transactions:
-                items.append(Fore.GREEN + self.display_transaction(tx) + Style.RESET_ALL)
-            else:
-                items.append(self.display_transaction(tx))            
-            functions.append(lambda tx=tx : self.toggle_transaction(tx))
+        # for tx in self.transactions:
+        #     if tx in self.transactions:
+        #         items.append(Fore.GREEN + self.display_transaction(tx) + Style.RESET_ALL)
+        #     else:
+        #         items.append(self.display_transaction(tx))            
+        #     functions.append(lambda tx=tx : self.toggle_transaction(tx))
         Menu.__init__(self, goodChain, title, items, functions)
 
     def toggle_transaction(self, tx):
@@ -42,7 +42,15 @@ class MenuMine(Menu):
         self.reload_menu()
         
     def mine_block(self):
-        pass
+        from MenuConfirm import MenuConfirm
+        confirm_title = "Are you sure you want to mine this block?"
+        for tx in self.transactions:
+            confirm_title += f"\n{self.display_transaction(tx)}"
+        if not MenuConfirm(confirm_title).show():
+            self.reload_menu()
+            return
+        self.goodChain.mine_block(self.transactions)
+        self.back()
     
     def get_total_reward(self):
         total = 50

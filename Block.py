@@ -1,6 +1,7 @@
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from Signature import *
+from datetime import datetime
 
 class Block:
 
@@ -10,6 +11,9 @@ class Block:
     next_block = None
     sigs = []
     miner = None
+    mine_time = None
+    nonce = 0
+
     def __init__(self, data, previous_block):
         self.data = data
         self.previous_block = previous_block
@@ -20,19 +24,24 @@ class Block:
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(bytes(str(self.data),'utf8'))
         digest.update(bytes(str(self.previous_hash),'utf8'))
+        digest.update(bytes(str(self.nonce),'utf8'))
         return digest.finalize()
 
-    # def mine(self, leading_zeros, public_key):
-    #     while not self.computeHash()[:leading_zeros] == b'\x00'*leading_zeros:
-    #         self.nonce += 1
-    #     self.hash = self.compute_hash()
-    #     self.miner = public_key
+    def mine(self, leading_zeros, public_key):
+        from time import time
+        start = time()
+        while not self.compute_hash()[:leading_zeros] == b'\x00'*leading_zeros:
+            self.nonce += 1
+        end = time()
+        self.miner = public_key
+        self.mine_time = datetime.now()
+        return end - start
 
     def is_valid(self):
-        if self.previous_block == None:
-            return True
         if not self.verify_reward():
             return False
+        if self.previous_block == None:
+            return True
         for transaction in self.data:
             if not transaction.is_valid():
                 return False

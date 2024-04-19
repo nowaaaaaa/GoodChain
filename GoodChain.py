@@ -148,6 +148,10 @@ class GoodChain:
             self.post_message("The last block has not yet been validated.")
             return False
         if len(Pool().transactions) >= 4:
+            from datetime import datetime
+            if self.last_block != None and (datetime.now() - self.last_block.mine_time).total_minutes() < 3:
+                self.post_message("You must wait at least 3 minutes after the last block was mined.")
+                return False
             return True
         self.post_message("There are not enough valid transactions in the pool to mine a block.")
         return False
@@ -165,3 +169,27 @@ class GoodChain:
         if invalid > 0:
             self.post_message(f"Removed {invalid} invalid transactions from the pool")
         return tx
+
+    def mine_block(self, transactions):
+        from Block import Block
+        from Transaction import Transaction
+        block = Block(transactions, self.last_block)
+        reward_tx = Transaction()
+        reward_amt = 50
+        for tx in transactions:
+            reward_amt += tx.get_reward()
+        reward_tx.set_input(None, reward_amt)
+        reward_tx.add_output(self.user.public_key, reward_amt)
+        block.add_tx(reward_tx)
+        if not block.is_valid():
+            self.post_message("Tried to mine an invalid block.")
+            return
+        time = block.mine(2, self.user.public_key)
+        self.add_block(block)
+        self.save_block()
+        self.post_message(f"Block successfully mined in {time} seconds.")
+    
+    def remove_from_pool(self, tx):
+        pool = Pool()
+        pool.remove(tx)
+        pool.save_pool()
