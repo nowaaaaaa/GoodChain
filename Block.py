@@ -27,11 +27,16 @@ class Block:
         digest.update(bytes(str(self.nonce),'utf8'))
         return digest.finalize()
 
+# 3 = Min time: 10.49948763847351, Max time: 177.64776468276978, Average time: 89.72544753551483
+# 2, 1000000 = Min time: 10.516226768493652, Max time: 16.234838247299194, Average time: 14.786657094955444
     def mine(self, leading_zeros, public_key):
         from time import time
         start = time()
-        while not self.compute_hash()[:leading_zeros] == b'\x00'*leading_zeros:
+        computed = self.compute_hash()
+        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//1000000)):
             self.nonce += 1
+            computed = self.compute_hash()
+        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//1000000))} {self.nonce} {self.compute_hash()}")
         end = time()
         self.miner = public_key
         self.mine_time = datetime.now()

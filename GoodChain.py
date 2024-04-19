@@ -41,6 +41,24 @@ class GoodChain:
         self.last_block.validate_block(rose.get_private_key(), rose.public_key)
         self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.save_block()
+    
+    def test_mining(self):
+        from Transaction import Transaction
+        from Block import Block
+        n = 10
+        min_time = 10000
+        max_time = -1
+        times = []
+        for i in range(n):
+            tx = Transaction()
+            tx.set_input(None, i)
+            tx.add_output(None, i)
+            times.append(Block([tx], None).mine(2, None))
+            if times[i] < min_time:
+                min_time = times[i]
+            if times[i] > max_time:
+                max_time = times[i]
+        print(f"Min time: {min_time}, Max time: {max_time}, Average time: {sum(times)/n}")
 
     def run(self):
         print("Welcome to GoodChain!")
@@ -51,6 +69,7 @@ class GoodChain:
             for tx in block.data:
                 print(self.readable_transaction(tx))
             block = block.previous_block
+        self.test_mining()
     
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -184,7 +203,7 @@ class GoodChain:
         if not block.is_valid():
             self.post_message("Tried to mine an invalid block.")
             return
-        time = block.mine(2, self.user.public_key)
+        time = block.mine(3, self.user.public_key)
         self.add_block(block)
         self.save_block()
         self.post_message(f"Block successfully mined in {time} seconds.")
