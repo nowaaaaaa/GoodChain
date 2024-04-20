@@ -10,7 +10,9 @@ class MenuMine(Menu):
                 self.back()
                 return
         self.transactions = transactions
-        title = f"Select transactions to include in the block\n Current reward: {self.get_total_reward()} coins{error}" 
+        title = f"Select transactions to include in the block\n Current reward: {self.get_total_reward()} coins{error}"
+        if len(goodChain.get_optional_transactions()) == 0: 
+            title = f"No more transactions include in the block\n Current reward: {self.get_total_reward()} coins{error}"
         items = []
         functions = []
         for tx in goodChain.get_optional_transactions():
@@ -55,6 +57,12 @@ class MenuMine(Menu):
         if not MenuConfirm(confirm_title).show():
             self.reload_menu()
             return
+        from os import name, system
+        if name == 'nt':
+            system('cls')
+        else:
+            system('clear')
+        print("Mining block, please wait...")
         self.goodChain.mine_block(self.transactions)
         self.back()
     

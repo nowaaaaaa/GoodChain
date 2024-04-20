@@ -36,6 +36,8 @@ class Pool:
                     break
             else:
                 self.invalid.append(tx)
+                self.transactions.remove(tx)
+                self.save_pool()
                 invalid += 1
         return result, invalid
     
@@ -48,6 +50,7 @@ class Pool:
             else:
                 self.transactions.remove(t)
                 self.invalid.append(t)
+                self.save_pool()
         return res, len(tx) - len(res)
     
     def remove_invalid(self, tx):

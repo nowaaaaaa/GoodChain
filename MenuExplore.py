@@ -40,7 +40,12 @@ class MenuExplore(Menu):
     def validate_block(self):
         from MenuConfirm import MenuConfirm
         if MenuConfirm("Are you sure you want to validate this block?").show():
-            self.goodChain.set_menu(MenuExplore(self.goodChain, self.goodChain.validate_block(self.block.block_id)))
+            result = self.goodChain.validate_block(self.block.block_id)
+            if result:
+                self.goodChain.set_menu(MenuExplore(self.goodChain, result))
+            else:
+                from MenuUser import MenuUser
+                self.goodChain.set_menu(MenuUser(self.goodChain))
         else:
             self.goodChain.set_menu(MenuExplore(self.goodChain, self.block))
     

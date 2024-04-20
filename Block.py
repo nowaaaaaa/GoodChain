@@ -19,6 +19,7 @@ class Block:
         self.miner = None
         self.mine_time = None
         self.nonce = 0
+        self.hash = None
 
 
     def compute_hash(self):
@@ -42,6 +43,7 @@ class Block:
         end = time()
         self.miner = public_key
         self.mine_time = datetime.now()
+        self.hash = self.compute_hash()
         return end - start
 
     def is_valid(self):
@@ -67,11 +69,12 @@ class Block:
         self.data.append(transaction)
     
     def validate_block(self, private_key, public_key):
-        if self.validated_by(public_key):
+        if self.validated_by(public_key) or self.hash != self.compute_hash():
             return False
         if self.is_valid():
             self.sigs.append((sign(self.compute_hash(), private_key), public_key))
             return True
+        return False
     
     def validated_by(self, public_key):
         for sig, key in self.sigs:
@@ -85,3 +88,10 @@ class Block:
             if verify(self.compute_hash(), sig, public_key) and public_key != self.miner:
                 count += 1
         return count >= 3
+    
+    def get_user_input(self, public_key):
+        amount = 0
+        for tx in self.data:
+            if tx.ingoing[0] == public_key:
+                amount += tx.ingoing[1]
+        return amount

@@ -73,8 +73,15 @@ class GoodChain:
     def run(self):
         while self.menu:
             self.menu.show()
-        # self.test_mining()
-    
+        # user1 = User(self.database.verify_user('mike111', 'mike111'))
+        # user2 = User(self.database.verify_user('rose222', 'rose222'))
+        # from Transaction import Transaction
+        # tx = Transaction()
+        # tx.set_input(user1.public_key, 0)
+        # tx.add_output(user2.public_key, 1)
+        # tx.sign(user1.get_private_key())
+        # self.add_to_pool(tx)
+
     def log_in(self, user_list):
         self.user = User(user_list)
         pool = Pool()
@@ -107,7 +114,6 @@ class GoodChain:
         pickle.dump(self.last_block, open(self.path, 'wb'))
     
     def check_balance(self, public_key, starting_block = None):
-        from Transaction import Transaction
         if starting_block == None:
             if self.last_block == None:
                 return 0
@@ -118,6 +124,17 @@ class GoodChain:
                 amount += tx.get_net_gain(public_key)
         return amount  
     
+    def check_unvalidated(self, public_key, starting_block = None):
+        if starting_block == None:
+            if self.last_block == None:
+                return 0
+            starting_block = self.last_block
+        amount = 0 if starting_block.previous_block == None else self.check_unvalidated(public_key, starting_block.previous_block)
+        if not starting_block.is_validated():
+            for tx in starting_block.data:
+                amount += tx.get_net_gain(public_key)
+        return amount
+    
     def check_available(self, public_key):
         return self.check_balance(public_key) - self.check_pool()
 
@@ -125,6 +142,11 @@ class GoodChain:
         public_key = self.user.public_key
         pool = Pool()
         return sum([tx.ingoing[1] for tx in pool.transactions if tx.ingoing[0] == public_key])
+    
+    def check_pool_incoming(self):
+        public_key = self.user.public_key
+        pool = Pool()
+        return sum([tx.get_net_gain(public_key) for tx in pool.transactions])
     
     def add_block(self, block):
         if block.previous_block != self.last_block:
@@ -239,9 +261,18 @@ class GoodChain:
         block = self.last_block
         while block != None and block.block_id != id:
             block = block.previous_block
-        block.validate_block(self.user.get_private_key(), self.user.public_key)
-        for s in self.last_block.sigs:
-            print(s[1])
+        balance_correct = True
+        for tx in block.data:
+            if tx.ingoing[0] != None and block.get_user_input(tx.ingoing[0]) > self.get_balance(tx.ingoing[0], block):
+                balance_correct = False
+                break
+        if not block.validate_block(self.user.get_private_key(), self.user.public_key) or not balance_correct:
+            if block.validated_by(self.user.public_key):
+                self.post_message(f"Could not validate block {block.block_id}, already validated by you")
+                return None
+            self.post_message("Could not validate invalid block.")
+            self.remove_block(id)
+            return None
         self.save_block()
         self.load_block()
         while block != None and block.block_id != id:
@@ -250,3 +281,35 @@ class GoodChain:
 
     def get_pool(self):
         return Pool().transactions
+    
+    def get_transactions(self, public_key):
+        block = self.last_block
+        tx = []
+        while block != None:
+            for t in block.data:
+                if t.ingoing[0] == public_key:
+                    tx.append(t)
+                else:
+                    for addr, amt in t.outputs:
+                        if addr == public_key:
+                            tx.append(t)
+                            break
+            block = block.previous_block
+        return tx
+    
+    def remove_block(self, id):
+        block = self.last_block
+        while block != None and block.block_id != id:
+            block = block.previous_block
+        if block == None:
+            return
+        pool = Pool()
+        tx = block.data.copy()
+        for t in pool.transactions:
+            tx.append(t)
+        pool.transactions = tx
+        pool.save_pool()
+        self.last_block = block.previous_block
+        self.save_block()
+        self.load_block()
+        self.post_message(f"Invalid block {id} removed from blockchain")
