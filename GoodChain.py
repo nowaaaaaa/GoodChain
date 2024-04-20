@@ -43,13 +43,12 @@ class GoodChain:
         self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.save_block()
     
-    # 300000, 5 tx = Min time: 14.040112495422363, Max time: 38.65707063674927, Average time: 25.442252230644225
-    # 150000, 5 Min time: 9.904855966567993, Max time: 22.739466905593872, Average time: 13.560591292381286
-    # 150000, 10 Min time: 18.764503002166748, Max time: 45.773133754730225, Average time: 27.044932866096495
+    # 10 tx, 10x = Min time: 11.533949613571167, Max time: 19.226192712783813, Average time: 14.611823320388794
+    
     def test_mining(self):
         from Transaction import Transaction
         from Block import Block
-        n = 10
+        n = 100
         min_time = 10000
         max_time = -1
         times = []
@@ -60,8 +59,8 @@ class GoodChain:
             transactions = []
             for j in range(10):
                 tx = Transaction()
-                tx.set_input(user1.public_key, i+1)
-                tx.add_output(user2.public_key, i+1)
+                tx.set_input(user1.public_key, i+2)
+                tx.add_output(user2.public_key, i+2)
                 tx.sign(user1.get_private_key())
                 transactions.append(tx)
             times.append(Block(transactions, self.last_block).mine(2, user3.public_key))

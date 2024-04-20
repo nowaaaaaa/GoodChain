@@ -28,20 +28,19 @@ class Block:
         digest.update(bytes(str(self.nonce),'utf8'))
         return digest.finalize()
 
-# 3 = Min time: 10.49948763847351, Max time: 177.64776468276978, Average time: 89.72544753551483
-# 2, 1000000 = Min time: 10.516226768493652, Max time: 16.234838247299194, Average time: 14.786657094955444
-# 2, 300000 = Min time: 5.411425352096558, Max time: 22.437660455703735, Average time: 12.940696859359742
-# 2, 1000000 (+1) = Min time: 4.336809873580933, Max time: 16.184622764587402, Average time: 11.672398400306701
-# 2, 1300000 (+1) = Min time: 4.279385328292847, Max time: 18.343408823013306, Average time: 14.090123772621155
     def mine(self, leading_zeros, public_key):
         from time import time
         start = time()
         computed = self.compute_hash()
-        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//120000)):
+        elapsed = 0
+        easiness = 0
+        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0') + easiness):
             self.nonce += 1
             computed = self.compute_hash()
+            elapsed = int(time() - start)
+            easiness = elapsed//(10-elapsed//2) if elapsed < 19 else 255
         end = time()
-        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//120000))} {self.nonce} {self.compute_hash()}")
+        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0') + easiness)} {elapsed} {self.nonce} {self.compute_hash()}")
         self.miner = public_key
         self.mine_time = datetime.now()
         return end - start
