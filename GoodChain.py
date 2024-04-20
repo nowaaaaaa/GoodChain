@@ -319,3 +319,11 @@ class GoodChain:
         self.save_block()
         self.load_block()
         self.post_message(f"Invalid block {id} removed from blockchain")
+    
+    def count_tx(self):
+        block = self.last_block
+        count = 0
+        while block != None:
+            count += len(block.data)
+            block = block.previous_block
+        return count
