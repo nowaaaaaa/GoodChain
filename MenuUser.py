@@ -7,8 +7,8 @@ class MenuUser(Menu):
         for message in goodChain.get_messages():
             title += f"\n{message}"
         goodChain.messages = []
-        items = ["Make a transaction", "Mine a block", "Explore the blockchain", "Log out"]
-        functions = [self.make_transaction, self.mine_block, self.explore_blockchain, self.log_out]
+        items = ["Make a transaction", "Mine a block", "Explore the blockchain", "View transaction pool", "View transaction history", "Log out"]
+        functions = [self.make_transaction, self.mine_block, self.explore_blockchain, self.view_transaction_pool, self.view_transaction_history, self.log_out]
         Menu.__init__(self, goodChain, title, items, functions)
 
     def make_transaction(self):
@@ -29,6 +29,14 @@ class MenuUser(Menu):
     def explore_blockchain(self):
         from MenuExplore import MenuExplore
         self.goodChain.set_menu(MenuExplore(self.goodChain))
+    
+    def view_transaction_pool(self):
+        from MenuPool import MenuPool
+        self.goodChain.set_menu(MenuPool(self.goodChain))
+
+    def view_transaction_history(self):
+        from MenuViewTransactions import MenuViewTransactions
+        self.goodChain.set_menu(MenuViewTransactions(self.goodChain))
 
     def log_out(self):
         from MenuMain import MenuMain

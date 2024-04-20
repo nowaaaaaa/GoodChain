@@ -16,8 +16,8 @@ class Transaction:
     def set_reward(self, amount):
         for output in self.outputs:
             if output[0] == None:
-                output = (None, amount)
-                return
+                self.outputs.remove(output)
+                break
         self.add_output(None, amount)
 
     def sign(self, private):

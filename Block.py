@@ -37,10 +37,9 @@ class Block:
         while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0') + easiness):
             self.nonce += 1
             computed = self.compute_hash()
-            elapsed = int(time() - start)
-            easiness = elapsed//(10-elapsed//2) if elapsed < 19 else 255
+            elapsed = time() - start
+            easiness = int(elapsed//(10-elapsed//2) if elapsed < 19.5 else 255)
         end = time()
-        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0') + easiness)} {elapsed} {self.nonce} {self.compute_hash()}")
         self.miner = public_key
         self.mine_time = datetime.now()
         return end - start

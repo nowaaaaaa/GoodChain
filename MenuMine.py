@@ -47,6 +47,11 @@ class MenuMine(Menu):
         confirm_title = "Are you sure you want to mine this block?"
         for tx in self.transactions:
             confirm_title += f"\n{self.display_transaction(tx)}"
+        from Transaction import Transaction
+        reward = Transaction()
+        reward.set_input(None, self.get_total_reward())
+        reward.add_output(self.goodChain.user.public_key, self.get_total_reward())
+        confirm_title += f"\n{self.display_transaction(reward)}"
         if not MenuConfirm(confirm_title).show():
             self.reload_menu()
             return

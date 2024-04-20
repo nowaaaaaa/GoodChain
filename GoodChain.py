@@ -44,11 +44,11 @@ class GoodChain:
         self.save_block()
     
     # 10 tx, 10x = Min time: 11.533949613571167, Max time: 19.226192712783813, Average time: 14.611823320388794
-    
+
     def test_mining(self):
         from Transaction import Transaction
         from Block import Block
-        n = 100
+        n = 10
         min_time = 10000
         max_time = -1
         times = []
@@ -59,8 +59,8 @@ class GoodChain:
             transactions = []
             for j in range(10):
                 tx = Transaction()
-                tx.set_input(user1.public_key, i+2)
-                tx.add_output(user2.public_key, i+2)
+                tx.set_input(user1.public_key, i)
+                tx.add_output(user2.public_key, i)
                 tx.sign(user1.get_private_key())
                 transactions.append(tx)
             times.append(Block(transactions, self.last_block).mine(2, user3.public_key))
@@ -71,9 +71,9 @@ class GoodChain:
         print(f"Min time: {min_time}, Max time: {max_time}, Average time: {sum(times)/n}")
 
     def run(self):
-        # while self.menu:
-        #     self.menu.show()
-        self.test_mining()
+        while self.menu:
+            self.menu.show()
+        # self.test_mining()
     
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -141,8 +141,10 @@ class GoodChain:
     def readable_transaction(self, tx):
         result = ""
         for addr, amt in tx.outputs:
-            result += f"{amt} to {self.database.get_username(addr)}"
-        result += f"\n{tx.ingoing[1]} from {self.database.get_username(tx.ingoing[0])}"
+            if addr == None:
+                continue
+            result += f"{amt} to {self.database.get_username(addr)}\n"
+        result += f"{tx.ingoing[1]} from {self.database.get_username(tx.ingoing[0])}, reward: {tx.get_reward()}"
         return result
 
     def post_message(self, message):
@@ -208,6 +210,9 @@ class GoodChain:
             self.post_message("Tried to mine an invalid block.")
             return
         time = block.mine(2, self.user.public_key)
+        if time < 10 or time > 20:
+            self.post_message(f"Block mined in {time} seconds, which is not in the accepted range.")
+            return
         self.add_block(block)
         self.save_block()
         self.load_block()
@@ -223,6 +228,13 @@ class GoodChain:
             pass
         pool.save_pool()
     
+    def replace_in_pool(self, old, new):
+        pool = Pool()
+        if not new.is_valid():
+            return
+        i = pool.transactions.index(old)
+        pool.transactions[i] = new    
+
     def validate_block(self, id):
         block = self.last_block
         while block != None and block.block_id != id:
@@ -232,8 +244,9 @@ class GoodChain:
             print(s[1])
         self.save_block()
         self.load_block()
-        for s in self.last_block.sigs:
-            print(s[1])
         while block != None and block.block_id != id:
             block = block.previous_block
         return block
+
+    def get_pool(self):
+        return Pool().transactions

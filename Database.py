@@ -74,6 +74,8 @@ class Database:
         return result[0] if result else None
     
     def get_username(self, public_key):
+        if public_key == None:
+            return "REWARD"
         self.cursor.execute("""
             SELECT username FROM users WHERE public_key = ?
                             """, (public_key,))

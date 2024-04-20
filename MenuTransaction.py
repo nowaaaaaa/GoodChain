@@ -11,7 +11,7 @@ class MenuTransaction(Menu):
         functions = []
         for i in range(len(self.transaction.outputs)):
             items.append(f"{goodChain.database.get_username(self.transaction.outputs[i][0])} receives {self.transaction.outputs[i][1]} coins")
-            functions.append(lambda : self.remove_output(i))
+            functions.append(lambda i=i : self.remove_output(i))
         title =  "Setting up a transaction, available balance: " + str(goodChain.check_available(goodChain.user.public_key)) + " coins"
         if error != "":
             title += '\n' + error
@@ -43,7 +43,7 @@ class MenuTransaction(Menu):
             addr = raw_addr
             username = self.goodChain.database.get_username(raw_addr)
         amount = input(f"Enter the amount to send to {username}: ")
-        if not amount.isdigit() or amount <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
+        if not amount.isdigit() or int(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
             self.reload_menu("Invalid amount entered")
             return
         self.transaction.add_output(addr, int(amount))
@@ -86,7 +86,7 @@ class MenuTransaction(Menu):
     def remove_output(self, index):
         from MenuConfirm import MenuConfirm
         if (MenuConfirm("Are you sure you want to remove this output?").show()):
-            self.transaction.outputs.remove[index]
+            self.transaction.outputs.remove(self.transaction.outputs[index])
         self.reload_menu()
 
     def reload_menu(self, error = ""):
