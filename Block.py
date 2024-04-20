@@ -37,11 +37,11 @@ class Block:
         from time import time
         start = time()
         computed = self.compute_hash()
-        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//400000)):
+        while not computed[:leading_zeros] == b'\x00'*leading_zeros or str(computed[leading_zeros]) > chr(ord('0')+(self.nonce//120000)):
             self.nonce += 1
             computed = self.compute_hash()
         end = time()
-        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//400000))} {self.nonce} {self.compute_hash()}")
+        print(f"Block mined: {str(computed[leading_zeros])} {chr(ord('0')+(self.nonce//120000))} {self.nonce} {self.compute_hash()}")
         self.miner = public_key
         self.mine_time = datetime.now()
         return end - start

@@ -43,6 +43,9 @@ class GoodChain:
         self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.save_block()
     
+    # 300000, 5 tx = Min time: 14.040112495422363, Max time: 38.65707063674927, Average time: 25.442252230644225
+    # 150000, 5 Min time: 9.904855966567993, Max time: 22.739466905593872, Average time: 13.560591292381286
+    # 150000, 10 Min time: 18.764503002166748, Max time: 45.773133754730225, Average time: 27.044932866096495
     def test_mining(self):
         from Transaction import Transaction
         from Block import Block
@@ -54,11 +57,14 @@ class GoodChain:
         user2 = User(self.database.verify_user('rose222', 'rose222'))
         user3 = User(self.database.verify_user('alex333', 'alex333'))
         for i in range(n):
-            tx = Transaction()
-            for j in range(5):
+            transactions = []
+            for j in range(10):
+                tx = Transaction()
                 tx.set_input(user1.public_key, i+1)
-                tx.add_output(user2.public_key, i)
-            times.append(Block([tx], self.last_block).mine(2, user3.public_key))
+                tx.add_output(user2.public_key, i+1)
+                tx.sign(user1.get_private_key())
+                transactions.append(tx)
+            times.append(Block(transactions, self.last_block).mine(2, user3.public_key))
             if times[i] < min_time:
                 min_time = times[i]
             if times[i] > max_time:
