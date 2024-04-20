@@ -6,8 +6,8 @@ class MenuUser(Menu):
         title = f"Welcome to GoodChain, {goodChain.user.username}.\n You have {goodChain.check_available(goodChain.user.public_key)} coins available, {goodChain.check_unvalidated(goodChain.user.public_key)} coins in unvalidated blocks and {goodChain.check_pool()} outgoing and {goodChain.check_pool_incoming()} incoming coins in the pool."
         for message in goodChain.get_messages():
             title += f"\n{message}"
-        items = ["Make a transaction", "Mine a block", "Explore the blockchain", "View transaction pool", "View transaction history", "Log out", "Exit"]
-        functions = [self.make_transaction, self.mine_block, self.explore_blockchain, self.view_transaction_pool, self.view_transaction_history, self.log_out, self.exit]
+        items = ["Make a transaction", "Mine a block", "Explore the blockchain", "View transaction pool", "View transaction history", "View your keys", "Log out", "Exit"]
+        functions = [self.make_transaction, self.mine_block, self.explore_blockchain, self.view_transaction_pool, self.view_transaction_history, self.view_keys, self.log_out, self.exit]
         Menu.__init__(self, goodChain, title, items, functions)
 
     def make_transaction(self):
@@ -36,6 +36,10 @@ class MenuUser(Menu):
     def view_transaction_history(self):
         from MenuViewTransactions import MenuViewTransactions
         self.goodChain.set_menu(MenuViewTransactions(self.goodChain))
+    
+    def view_keys(self):
+        from MenuViewKeys import MenuViewKeys
+        self.goodChain.set_menu(MenuViewKeys(self.goodChain))
 
     def log_out(self):
         from MenuMain import MenuMain

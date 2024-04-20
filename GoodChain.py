@@ -145,8 +145,13 @@ class GoodChain:
     
     def check_pool_incoming(self):
         public_key = self.user.public_key
+        amount = 0
         pool = Pool()
-        return sum([tx.get_net_gain(public_key) for tx in pool.transactions])
+        for tx in pool.transactions:
+            for addr, amt in tx.outputs:
+                if addr == public_key:
+                    amount += amt
+        return amount
     
     def add_block(self, block):
         if block.previous_block != self.last_block:
@@ -255,7 +260,8 @@ class GoodChain:
         if not new.is_valid():
             return
         i = pool.transactions.index(old)
-        pool.transactions[i] = new    
+        pool.transactions[i] = new
+        pool.save_pool()
 
     def validate_block(self, id):
         block = self.last_block

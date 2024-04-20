@@ -17,7 +17,7 @@ class MenuPool(Menu):
     
     def view_transaction(self, tx):
         if MenuViewTransaction(self.goodChain, tx).show():
-            self.reload_menu("Transaction in pool edited")
+            self.reload_menu("\nTransaction in pool edited")
         else:
             self.reload_menu()
     
@@ -62,7 +62,13 @@ class MenuEditTransaction(Menu):
         items = []
         functions = []
         if transaction == None:
-            self.transaction = old_transaction
+            from Transaction import Transaction
+            self.transaction = Transaction()
+            self.transaction.set_input(old_transaction.ingoing[0], old_transaction.ingoing[1])
+            for o in old_transaction.outputs:
+                self.transaction.add_output(o[0], o[1])
+            self.transaction.set_reward(old_transaction.get_reward())
+            self.transaction.id = old_transaction.id
         else:
             self.transaction = transaction
         self.old_transaction = old_transaction
@@ -146,4 +152,4 @@ class MenuEditTransaction(Menu):
         from MenuConfirm import MenuConfirm
         if (MenuConfirm("Are you sure you want to remove this transaction?").show()):
             return True, None
-        return False, None
+        return self.reload_menu()

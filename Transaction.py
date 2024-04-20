@@ -23,7 +23,10 @@ class Transaction:
     def sign(self, private):
         message = self.__gather()
         newsig = sign(message, private)
-        self.sigs.append(newsig)
+        if len(self.sigs) == 0:
+            self.sigs.append(newsig)
+        else:
+            self.sigs[0] = newsig
                
     def is_valid(self):
         total_in = self.ingoing[1]
