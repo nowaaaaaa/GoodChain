@@ -16,11 +16,11 @@ class Block:
             self.previous_hash = None
         self.next_block = None
         self.sigs = []
+        self.inv_sigs = []
         self.miner = None
         self.mine_time = None
         self.nonce = 0
         self.hash = None
-
 
     def compute_hash(self):
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
@@ -69,18 +69,24 @@ class Block:
         self.data.append(transaction)
     
     def validate_block(self, private_key, public_key):
-        if self.validated_by(public_key) or self.hash != self.compute_hash():
-            return False
-        if self.is_valid():
-            self.sigs.append((sign(self.compute_hash(), private_key), public_key))
-            return True
-        return False
+        if not self.tamper_check():
+            return 0
+        if self.validated_by(public_key):
+            return 1
+        self.sigs.append((sign(self.compute_hash(), private_key), public_key))
+        return 2
     
     def validated_by(self, public_key):
         for sig, key in self.sigs:
             if key == public_key:
                 return True
+        for sig, key in self.inv_sigs:
+            if key == public_key:
+                return True
         return False
+
+    def sign_inv(self, private_key, public_key):
+        self.inv_sigs.append((sign(self.compute_hash(), private_key), public_key))
 
     def is_validated(self):
         count = 0
@@ -88,6 +94,9 @@ class Block:
             if verify(self.compute_hash(), sig, public_key) and public_key != self.miner:
                 count += 1
         return count >= 3
+    
+    def tamper_check(self):
+        return self.hash == self.compute_hash() and self.is_valid()
     
     def get_user_input(self, public_key):
         amount = 0

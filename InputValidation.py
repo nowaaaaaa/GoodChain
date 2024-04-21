@@ -1,7 +1,7 @@
 import re
 
 def validate_username(username):
-    if len(username) < 4:
+    if len(username) < 5:
         return False
     elif len(username) > 12:
         return False

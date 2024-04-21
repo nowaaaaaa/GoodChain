@@ -105,12 +105,14 @@ class GoodChain:
         self.menu = menu
     
     def load_block(self):
+        self.remove_invalid_blocks()
         try:
             self.last_block = pickle.load(open(self.path, 'rb'))
         except:
             return
     
     def save_block(self):
+        self.remove_invalid_blocks()
         pickle.dump(self.last_block, open(self.path, 'wb'))
     
     def check_balance(self, public_key, starting_block = None):
@@ -272,18 +274,45 @@ class GoodChain:
             if tx.ingoing[0] != None and block.get_user_input(tx.ingoing[0]) > self.get_balance(tx.ingoing[0], block):
                 balance_correct = False
                 break
-        if not block.validate_block(self.user.get_private_key(), self.user.public_key) or not balance_correct:
-            if block.validated_by(self.user.public_key):
-                self.post_message(f"Could not validate block {block.block_id}, already validated by you")
-                return None
+        validation_result = block.validate_block(self.user.get_private_key(), self.user.public_key)
+        self.save_block()
+        if not balance_correct or validation_result == 0:
             self.post_message("Could not validate invalid block.")
-            self.remove_block(id)
+            block.sign_inv(self.user.get_private_key(), self.user.public_key)
+            self.save_block()
+        elif validation_result == 1:
+            self.post_message(f"Could not validate block {block.block_id}, already validated by you")
+            return None
+        elif validation_result == 2:
+            return block
+        if len(block.inv_sigs) >= 3:
+            self.remove_invalidated_block(block.id)
+            self.post_message(f"Block {block.block_id} invalidated by 3 users, removed it from blockchain.")
             return None
         self.save_block()
-        self.load_block()
-        while block != None and block.block_id != id:
-            block = block.previous_block
         return block
+
+    def get_last_valid(self):
+        block = self.last_block
+        while block != None and not block.tamper_check():
+            block = block.previous_block
+        return block.block_id if block != None else -1
+    
+    def remove_invalid_blocks(self):
+        block = self.last_block
+        last_valid = self.get_last_valid()
+        if block == None or last_valid == self.last_block.block_id:
+            return
+        if last_valid == -1:
+            self.last_block = None
+            return
+        while block.block_id > last_valid and block != None:
+            block = block.previous_block
+        if block == None:
+            self.last_block = None
+            return
+        self.last_block = block
+        self.last_block.next_block = None
 
     def get_pool(self):
         return Pool().transactions
@@ -303,7 +332,7 @@ class GoodChain:
             block = block.previous_block
         return tx
     
-    def remove_block(self, id):
+    def remove_invalidated_block(self, id):
         block = self.last_block
         while block != None and block.block_id != id:
             block = block.previous_block
@@ -316,6 +345,7 @@ class GoodChain:
         pool.transactions = tx
         pool.save_pool()
         self.last_block = block.previous_block
+        self.last_block.next_block = None
         self.save_block()
         self.load_block()
         self.post_message(f"Invalid block {id} removed from blockchain")

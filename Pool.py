@@ -12,6 +12,10 @@ class Pool:
             with open(self.path, 'rb') as f:
                 self.transactions = pickle.load(f)
                 self.invalid = pickle.load(f)
+                loaded_hash = pickle.load(f)
+                if loaded_hash != self.compute_hash():
+                    self.transactions = []
+                    self.invalid = []
         except:
             return
     
@@ -19,6 +23,7 @@ class Pool:
         with open(self.path, 'wb') as f:
             pickle.dump(self.transactions, f)
             pickle.dump(self.invalid, f)
+            pickle.dump(self.compute_hash(), f)
 
     def add_tx(self, tx):
         self.transactions.append(tx)
@@ -56,4 +61,12 @@ class Pool:
     def remove_invalid(self, tx):
         self.invalid.remove(tx)
         self.save_pool()
+    
+    def compute_hash(self):
+        from cryptography.hazmat.primitives import hashes
+        from cryptography.hazmat.backends import default_backend
+        digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        digest.update(bytes(str(self.transactions),'utf8'))
+        digest.update(bytes(str(self.invalid),'utf8'))
+        return digest.finalize()
 
