@@ -3,7 +3,7 @@ from Transaction import Transaction
 
 class MenuUser(Menu):
     def __init__(self, goodChain):
-        title = f"Welcome to GoodChain, {goodChain.user.username}.\n You have {goodChain.check_available(goodChain.user.public_key)} coins available, {goodChain.check_unvalidated(goodChain.user.public_key)} coins in unvalidated blocks and {goodChain.check_pool()} outgoing and {goodChain.check_pool_incoming()} incoming coins in the pool.\n GoodChain currently has {goodChain.last_block.block_id+1  if goodChain.last_block != None else 0} {"block" if goodChain.last_block != None and goodChain.last_block.block_id == 0 else "blocks"} with {goodChain.count_tx()} total transactions."
+        title = f"Welcome to GoodChain, {goodChain.user.username}.\n You have {goodChain.check_available(goodChain.user.public_key)} coins available, {goodChain.check_unvalidated(goodChain.user.public_key)} coins in unvalidated blocks and {goodChain.check_pool()} outgoing and {goodChain.check_pool_incoming()} incoming coins in the pool.\n GoodChain currently has {goodChain.last_block.block_id+1  if goodChain.last_block != None else 0} {"block" if goodChain.last_block != None and goodChain.last_block.block_id == 0 else "blocks"} with {goodChain.count_tx()} total transactions."  + goodChain.get_notifications()
         for message in goodChain.get_messages():
             title += f"\n{message}"
         items = ["Make a transaction", "Mine a block", "Explore the blockchain", "View transaction pool", "View transaction history", "View your keys", "Log out", "Exit"]

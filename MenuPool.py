@@ -1,5 +1,6 @@
 from Menu import Menu
 from MenuTransaction import MenuTransaction
+from Transaction import is_float
 
 class MenuPool(Menu):
     def __init__(self, goodChain, error = ""):
@@ -109,7 +110,7 @@ class MenuEditTransaction(Menu):
             addr = raw_addr
             username = self.goodChain.database.get_username(raw_addr)
         amount = input(f"Enter the amount to send to {username}: ")
-        if not amount.isdigit() or int(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
+        if not amount.is_float() or int(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
             return self.reload_menu("Invalid amount entered")
         self.transaction.add_output(addr, int(amount))
         return self.reload_menu()

@@ -5,9 +5,14 @@ class Pool:
     def __init__(self):
         self.transactions = []
         self.invalid = []
+        self.tampered = False
         self.load_pool()
+        self.save_pool()
 
     def load_pool(self):
+        from os.path import exists
+        if not exists(self.path):
+            return
         try:
             with open(self.path, 'rb') as f:
                 self.transactions = pickle.load(f)
@@ -16,7 +21,9 @@ class Pool:
                 if loaded_hash != self.compute_hash():
                     self.transactions = []
                     self.invalid = []
+                    self.tampered = True
         except:
+            self.tampered = True
             return
     
     def save_pool(self):

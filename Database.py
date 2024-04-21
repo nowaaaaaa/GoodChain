@@ -11,9 +11,11 @@ class Database:
     def __init__(self):
         self.connection = sqlite3.connect(self.path)
         self.cursor = self.connection.cursor()
+        self.tampered = False
         if not self.verify_hash():
             self.cursor.execute("DROP TABLE IF EXISTS users")
             self.connection.commit()
+            self.tampered = True
         self.setup_tables()
         
     def setup_tables(self):
@@ -25,19 +27,19 @@ class Database:
                 public_key BLOB                
             )
         """)
-        for user in self.default_users:
-            username, password = user
-            prv, pub = generate_keys()
-            prv = prv.private_bytes(
-                encoding=serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.BestAvailableEncryption(password.encode('utf-8'))
-            )
-            self.cursor.execute("""
-                INSERT OR IGNORE INTO users VALUES
-                    (?, ?, ?, ?)
-            """, (username, hash_password(password), prv, pub))
-        self.connection.commit()
+        # for user in self.default_users:
+        #     username, password = user
+        #     prv, pub = generate_keys()
+        #     prv = prv.private_bytes(
+        #         encoding=serialization.Encoding.PEM,
+        #         format=serialization.PrivateFormat.TraditionalOpenSSL,
+        #         encryption_algorithm=serialization.BestAvailableEncryption(password.encode('utf-8'))
+        #     )
+        #     self.cursor.execute("""
+        #         INSERT OR IGNORE INTO users VALUES
+        #             (?, ?, ?, ?)
+        #     """, (username, hash_password(password), prv, pub))
+        # self.connection.commit()
         self.enter_hash()
 
     def verify_user(self, username, password):

@@ -8,10 +8,13 @@ import pickle
 class GoodChain:
     path = './Data/blockchain.dat'
     messages = []
+    notifications = []
     user = None
 
     def __init__(self):
         self.database = Database()
+        if self.database.tampered:
+            self.notifications.append("Detected database tampering, users removed.")
         self.last_block = None
         # self.make_test_blocks()
         self.load_block()
@@ -85,6 +88,9 @@ class GoodChain:
     def log_in(self, user_list):
         self.user = User(user_list)
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
+            return
         for tx in pool.invalid:
             if tx.ingoing[0] == self.user.public_key:
                 self.add_message("Invalid transaction removed from pool")
@@ -105,10 +111,16 @@ class GoodChain:
         self.menu = menu
     
     def load_block(self):
-        self.remove_invalid_blocks()
         try:
             self.last_block = pickle.load(open(self.path, 'rb'))
+            self.remove_invalid_blocks()
+            self.save_block()
         except:
+            from os.path import exists
+            if exists(self.path):
+                self.notifications.append("Detected blockchain tampering, all blocks removed.")
+                self.remove_invalid_blocks()
+                self.save_block()
             return
     
     def save_block(self):
@@ -143,12 +155,16 @@ class GoodChain:
     def check_pool(self):
         public_key = self.user.public_key
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         return sum([tx.ingoing[1] for tx in pool.transactions if tx.ingoing[0] == public_key])
     
     def check_pool_incoming(self):
         public_key = self.user.public_key
         amount = 0
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         for tx in pool.transactions:
             for addr, amt in tx.outputs:
                 if addr == public_key:
@@ -164,6 +180,8 @@ class GoodChain:
     
     def add_to_pool(self, tx):
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         pool.add_tx(tx)
         pool.save_pool()
     
@@ -201,7 +219,10 @@ class GoodChain:
         if self.last_block != None and not self.last_block.is_validated():
             self.post_message("The last block has not yet been validated.")
             return False
-        if len(Pool().transactions) >= 4:
+        pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
+        if len(pool.transactions) >= 4:
             from datetime import datetime
             if self.last_block != None and (datetime.now() - self.last_block.mine_time).total_seconds() < 180:
                 self.post_message("You must wait at least 3 minutes after the last block was mined.")
@@ -212,6 +233,8 @@ class GoodChain:
     
     def get_mandatory_transactions(self):
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         tx, invalid = pool.get_mandatory()
         if invalid > 0:
             self.post_message(f"Removed {invalid} invalid transactions from the pool")
@@ -219,6 +242,8 @@ class GoodChain:
     
     def get_optional_transactions(self):
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         tx, invalid = pool.get_optional()
         if invalid > 0:
             self.post_message(f"Removed {invalid} invalid transactions from the pool")
@@ -251,6 +276,8 @@ class GoodChain:
     
     def remove_from_pool(self, tx):
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         try:
             pool.transactions.remove(tx)
         except:
@@ -259,6 +286,9 @@ class GoodChain:
     
     def replace_in_pool(self, old, new):
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
+            return
         if not new.is_valid():
             return
         i = pool.transactions.index(old)
@@ -305,17 +335,23 @@ class GoodChain:
             return
         if last_valid == -1:
             self.last_block = None
+            self.notifications.append("Detected tampering with the blockchain, all blocks removed.")
             return
         while block.block_id > last_valid and block != None:
             block = block.previous_block
         if block == None:
             self.last_block = None
+            self.notifications.append("Detected tampering with the blockchain, all blocks removed.")
             return
         self.last_block = block
         self.last_block.next_block = None
+        self.notifications.append(f"Detected tampering with the blockchain, removed blocks after block {last_valid}.")
 
     def get_pool(self):
-        return Pool().transactions
+        pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
+        return pool.transactions
     
     def get_transactions(self, public_key):
         block = self.last_block
@@ -339,9 +375,14 @@ class GoodChain:
         if block == None:
             return
         pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         tx = block.data.copy()
         for t in pool.transactions:
-            tx.append(t)
+            if t.is_valid():
+                tx.append(t)
+            else:
+                pool.invalid.append(t)
         pool.transactions = tx
         pool.save_pool()
         self.last_block = block.previous_block
@@ -357,3 +398,10 @@ class GoodChain:
             count += len(block.data)
             block = block.previous_block
         return count
+
+    def get_notifications(self):
+        res = ""
+        for n in self.notifications:
+            res += "\n" + n
+        self.notifications = []
+        return res
