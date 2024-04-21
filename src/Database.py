@@ -2,7 +2,7 @@ import sqlite3
 from Signature import *
 
 class Database:
-    path = './Data/users.sqlite'
+    path = '../data/users.sqlite'
     default_users = [
         ('mike111', 'mike111'),
         ('rose222', 'rose222'),

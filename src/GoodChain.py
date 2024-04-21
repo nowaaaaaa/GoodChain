@@ -6,7 +6,7 @@ from Pool import Pool
 import pickle
 
 class GoodChain:
-    path = './Data/blockchain.dat'
+    path = '../data/blockchain.dat'
     messages = []
     notifications = []
     user = None
@@ -18,57 +18,6 @@ class GoodChain:
         self.last_block = None
         self.load_block()
         self.menu = MenuMain(self)
-
-    def make_test_blocks(self):
-        from Transaction import Transaction
-        tx = Transaction()
-        mike = User(self.database.verify_user('mike111', 'mike111'))
-        rose = User(self.database.verify_user('rose222', 'rose222'))
-        alex = User(self.database.verify_user('alex333', 'alex333'))
-        tx.set_input(mike.public_key, 1)
-        tx.add_output(rose.public_key, 1)
-        tx.sign(mike.get_private_key())
-        from Block import Block
-        self.add_block(Block([], None))
-        self.last_block.add_tx(tx)
-        self.last_block.validate_block(mike.get_private_key(), mike.public_key)
-        self.last_block.validate_block(rose.get_private_key(), rose.public_key)
-        self.last_block.validate_block(alex.get_private_key(), alex.public_key)
-        self.add_block(Block([], self.last_block))
-        tx = Transaction()
-        tx.set_input(rose.public_key, 1)
-        tx.add_output(alex.public_key, 1)
-        tx.sign(rose.get_private_key())
-        self.last_block.add_tx(tx)
-        self.last_block.validate_block(mike.get_private_key(), mike.public_key)
-        self.last_block.validate_block(rose.get_private_key(), rose.public_key)
-        self.last_block.validate_block(alex.get_private_key(), alex.public_key)
-        self.save_block()
-
-    def test_mining(self):
-        from Transaction import Transaction
-        from Block import Block
-        n = 10
-        min_time = 10000
-        max_time = -1
-        times = []
-        user1 = User(self.database.verify_user('mike111', 'mike111'))
-        user2 = User(self.database.verify_user('rose222', 'rose222'))
-        user3 = User(self.database.verify_user('alex333', 'alex333'))
-        for i in range(n):
-            transactions = []
-            for j in range(10):
-                tx = Transaction()
-                tx.set_input(user1.public_key, i)
-                tx.add_output(user2.public_key, i)
-                tx.sign(user1.get_private_key())
-                transactions.append(tx)
-            times.append(Block(transactions, self.last_block).mine(2, user3.public_key))
-            if times[i] < min_time:
-                min_time = times[i]
-            if times[i] > max_time:
-                max_time = times[i]
-        print(f"Min time: {min_time}, Max time: {max_time}, Average time: {sum(times)/n}")
 
     def run(self):
         while self.menu:

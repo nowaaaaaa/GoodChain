@@ -1,6 +1,6 @@
 import pickle
 class Pool:
-    path = 'Data/pool.dat'
+    path = '../data/pool.dat'
     
     def __init__(self):
         self.transactions = []
