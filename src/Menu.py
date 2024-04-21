@@ -1,6 +1,6 @@
 # from simple_term_menu import TerminalMenu
 from TerminalMenu import *
-from GoodChain import *
+from Chain import *
 
 class Menu:
     def __init__(self, goodChain, title, items, functions):
