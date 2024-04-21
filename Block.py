@@ -57,8 +57,8 @@ class Block:
         return self.previous_block.compute_hash() == self.previous_hash and self.previous_block.is_valid()
     
     def verify_reward(self):
-        reward = 50
-        actual = 0
+        reward = 50.0
+        actual = 0.0
         for tx in self.data:
             if tx.ingoing[0] == None:
                 actual = tx.ingoing[1]
@@ -99,7 +99,7 @@ class Block:
         return self.hash == self.compute_hash() and self.is_valid()
     
     def get_user_input(self, public_key):
-        amount = 0
+        amount = 0.0
         for tx in self.data:
             if tx.ingoing[0] == public_key:
                 amount += tx.ingoing[1]

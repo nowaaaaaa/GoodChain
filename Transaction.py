@@ -52,7 +52,7 @@ class Transaction:
         for addr, amt in self.outputs:
             if addr == None:
                 return amt
-        return 0
+        return 0.0
 
     def __repr__(self):
         result = "INPUT:\n"
@@ -67,7 +67,7 @@ class Transaction:
         return result
     
     def get_net_gain(self, addr):
-        net = 0
+        net = 0.0
         for a, amt in self.outputs:
             if a == addr:
                 net += amt

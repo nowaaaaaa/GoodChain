@@ -16,7 +16,6 @@ class GoodChain:
         if self.database.tampered:
             self.notifications.append("Detected database tampering, users removed.")
         self.last_block = None
-        # self.make_test_blocks()
         self.load_block()
         self.menu = MenuMain(self)
 
@@ -45,8 +44,6 @@ class GoodChain:
         self.last_block.validate_block(rose.get_private_key(), rose.public_key)
         self.last_block.validate_block(alex.get_private_key(), alex.public_key)
         self.save_block()
-    
-    # 10 tx, 10x = Min time: 11.533949613571167, Max time: 19.226192712783813, Average time: 14.611823320388794
 
     def test_mining(self):
         from Transaction import Transaction
@@ -76,14 +73,6 @@ class GoodChain:
     def run(self):
         while self.menu:
             self.menu.show()
-        # user1 = User(self.database.verify_user('mike111', 'mike111'))
-        # user2 = User(self.database.verify_user('rose222', 'rose222'))
-        # from Transaction import Transaction
-        # tx = Transaction()
-        # tx.set_input(user1.public_key, 0)
-        # tx.add_output(user2.public_key, 1)
-        # tx.sign(user1.get_private_key())
-        # self.add_to_pool(tx)
 
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -130,9 +119,9 @@ class GoodChain:
     def check_balance(self, public_key, starting_block = None):
         if starting_block == None:
             if self.last_block == None:
-                return 0
+                return 0.0
             starting_block = self.last_block
-        amount = 0 if starting_block.previous_block == None else self.check_balance(public_key, starting_block.previous_block)
+        amount = 0.0 if starting_block.previous_block == None else self.check_balance(public_key, starting_block.previous_block)
         if starting_block.is_validated():
             for tx in starting_block.data:
                 amount += tx.get_net_gain(public_key)
@@ -141,9 +130,9 @@ class GoodChain:
     def check_unvalidated(self, public_key, starting_block = None):
         if starting_block == None:
             if self.last_block == None:
-                return 0
+                return 0.0
             starting_block = self.last_block
-        amount = 0 if starting_block.previous_block == None else self.check_unvalidated(public_key, starting_block.previous_block)
+        amount = 0.0 if starting_block.previous_block == None else self.check_unvalidated(public_key, starting_block.previous_block)
         if not starting_block.is_validated():
             for tx in starting_block.data:
                 amount += tx.get_net_gain(public_key)
@@ -161,7 +150,7 @@ class GoodChain:
     
     def check_pool_incoming(self):
         public_key = self.user.public_key
-        amount = 0
+        amount = 0.0
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")

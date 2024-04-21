@@ -110,16 +110,16 @@ class MenuEditTransaction(Menu):
             addr = raw_addr
             username = self.goodChain.database.get_username(raw_addr)
         amount = input(f"Enter the amount to send to {username}: ")
-        if not amount.is_float() or int(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + int(amount):
+        if not is_float(amount) or float(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + float(amount):
             return self.reload_menu("Invalid amount entered")
-        self.transaction.add_output(addr, int(amount))
+        self.transaction.add_output(addr, float(amount))
         return self.reload_menu()
 
     def set_reward(self):
         amount = input(f"Enter mining reward amount: ")
-        if not amount.isdigit() or self.available < self.get_total_output() + int(amount):
+        if not is_float(amount) or self.available < self.get_total_output() + float(amount) or float(amount) < 0.0:
             return self.reload_menu("Invalid amount entered")
-        self.transaction.set_reward(int(amount))
+        self.transaction.set_reward(float(amount))
         return self.reload_menu()
 
     def back(self):
