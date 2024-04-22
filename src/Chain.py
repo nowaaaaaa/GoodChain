@@ -239,7 +239,7 @@ class GoodChain:
             block = block.previous_block
         balance_correct = True
         for tx in block.data:
-            if tx.ingoing[0] != None and block.get_user_input(tx.ingoing[0]) > self.get_balance(tx.ingoing[0], block):
+            if tx.ingoing[0] != None and block.get_user_input(tx.ingoing[0]) > self.check_balance(tx.ingoing[0], block):
                 balance_correct = False
                 break
         validation_result = block.validate_block(self.user.get_private_key(), self.user.public_key)
