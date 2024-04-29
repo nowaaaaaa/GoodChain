@@ -25,6 +25,8 @@ class GoodChain:
 
     def log_in(self, user_list):
         self.user = User(user_list)
+        if not self.last_block.is_validated():
+            self.validate_block(self.last_block.block_id)
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
@@ -37,8 +39,8 @@ class GoodChain:
     def reward_sign_up(self):
         from Transaction import Transaction
         tx = Transaction()
-        tx.set_input(None, 50)
-        tx.add_output(self.user.public_key, 50)
+        tx.set_input(None, 50.0)
+        tx.add_output(self.user.public_key, 50.0)
         self.add_to_pool(tx)
 
     def log_out(self):
@@ -245,7 +247,7 @@ class GoodChain:
         validation_result = block.validate_block(self.user.get_private_key(), self.user.public_key)
         self.save_block()
         if not balance_correct or validation_result == 0:
-            self.post_message("Could not validate invalid block.")
+            self.post_message(f"Could not validate invalid block {block.block_id}.")
             block.sign_inv(self.user.get_private_key(), self.user.public_key)
             self.save_block()
         elif validation_result == 1:
