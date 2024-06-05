@@ -119,11 +119,13 @@ class GoodChain:
         self.last_block = block
     
     def add_to_pool(self, tx):
+        from NetTransaction import TransactionClient
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         pool.add_tx(tx)
         pool.save_pool()
+        TransactionClient().send_data(tx)
     
     def readable_transaction(self, tx):
         result = ""

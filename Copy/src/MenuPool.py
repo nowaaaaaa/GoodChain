@@ -84,7 +84,7 @@ class MenuEditTransaction(Menu):
             title += '\n' + error
         items.append("Add output")
         functions.append(self.add_output)
-        items.append("Set mining reward, currently: " + str(self.transaction.get_reward()) + " coins")
+        items.append("Set transaction fee, currently: " + str(self.transaction.get_reward()) + " coins")
         functions.append(self.set_reward)
         items.append("Confirm transaction")
         functions.append(self.confirm_transaction)
@@ -116,7 +116,7 @@ class MenuEditTransaction(Menu):
         return self.reload_menu()
 
     def set_reward(self):
-        amount = input(f"Enter mining reward amount: ")
+        amount = input(f"Enter transaction fee amount: ")
         if not is_float(amount) or self.available < self.get_total_output() + float(amount) or float(amount) < 0.0:
             return self.reload_menu("Invalid amount entered")
         self.transaction.set_reward(float(amount))

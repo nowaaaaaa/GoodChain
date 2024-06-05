@@ -20,7 +20,7 @@ class TerminalMenu:
             print(self.title)
             for i, item in enumerate(self.items):
                 if i == self.selected_index:
-                    print(Back.WHITE + self.menu_cursor + ' ' + item.replace("\n", "\n  ") + Style.RESET_ALL)
+                    print(Back.WHITE + Fore.BLACK + self.menu_cursor + ' ' + item.replace("\n", "\n  ") + Style.RESET_ALL)
                 else:
                     print(' ' + item.replace("\n", "\n "))
             sleep(0.2)

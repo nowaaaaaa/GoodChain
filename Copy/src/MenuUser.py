@@ -21,10 +21,6 @@ class MenuUser(Menu):
     def make_transaction(self):
         from MenuTransaction import MenuTransaction
         self.goodChain.set_menu(MenuTransaction(self.goodChain))
-    
-    def receive_transactions(self):
-        from MenuReceive import MenuReceive
-        self.goodChain.set_menu(MenuReceive(self.goodChain))
 
     def mine_block(self):
         from MenuMine import MenuMine

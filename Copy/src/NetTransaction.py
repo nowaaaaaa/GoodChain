@@ -3,7 +3,7 @@ from Networking import *
 class TransactionServer:
     def __init__(self):
         self.HOST = socket.gethostbyname('localhost')
-        self.PORT = 50000
+        self.PORT = 50001
         self.ADDR = (self.HOST, self.PORT)
 
     def start_listening(self):
@@ -30,7 +30,7 @@ class TransactionServer:
 class TransactionClient:
     def __init__(self):
         self.HOST = socket.gethostbyname('localhost')
-        self.PORT = 50001
+        self.PORT = 50000
         self.ADDR = (self.HOST, self.PORT)
     
     def send_data(self, data):
