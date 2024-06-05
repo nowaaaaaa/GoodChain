@@ -1,14 +1,15 @@
 from Networking import *
 
 class TransactionServer:
-    def __init__(self):
+    def __init__(self, goodChain):
         self.HOST = socket.gethostbyname('localhost')
         self.PORT = 50001
         self.ADDR = (self.HOST, self.PORT)
+        self.goodChain = goodChain
 
     def start_listening(self):
-        with socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(self.ADDRADDR)
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(self.ADDR)
             s.listen()
             print(f'Server is listening to {self.ADDR}...')
             while True:
@@ -23,7 +24,8 @@ class TransactionServer:
         if data_length:
             data_length = int(data_length)
         data = conn.recv(data_length).decode(DATA_FORMAT)
-        print(f'Received: {data}')
+        print(f'Received msg')
+        self.goodChain.readable_transaction(data)
         conn.send(f'Message received: {data}'.encode(DATA_FORMAT))
         conn.close()
 
