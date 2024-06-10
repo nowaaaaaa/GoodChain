@@ -236,6 +236,7 @@ class GoodChain:
         i = pool.transactions.index(old)
         pool.transactions[i] = new
         pool.save_pool()
+        #TODO: send en delete
 
     def validate_block(self, id):
         block = self.last_block

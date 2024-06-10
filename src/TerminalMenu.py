@@ -25,7 +25,9 @@ class TerminalMenu:
                     print(' ' + item.replace("\n", "\n "))
             sleep(0.2)
             while True:
-                key = keyboard.read_key(suppress=True)
+                # key = keyboard.read_key(suppress=True)
+                key_event = keyboard.read_event(suppress=True)
+                key = key_event.name
                 if key == 'up':
                     self.selected_index = (self.selected_index - 1) % len(self.items)
                     break
