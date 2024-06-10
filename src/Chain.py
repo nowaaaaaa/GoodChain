@@ -125,7 +125,7 @@ class GoodChain:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
         pool.add_tx(tx)
         pool.save_pool()
-        TransactionClient().send_data(tx)
+        TransactionClient().send_transaction(tx)
     
     def readable_transaction(self, tx):
         result = ""
