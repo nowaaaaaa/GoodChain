@@ -2,6 +2,7 @@ import keyboard
 from os import system, name
 from time import sleep
 from colorama import Fore, Back, Style
+import KeyboardInput
 
 class TerminalMenu:
 
@@ -24,10 +25,14 @@ class TerminalMenu:
                 else:
                     print(' ' + item.replace("\n", "\n "))
             sleep(0.2)
+            # kb = KeyboardInput.KBHit()
             while True:
+                key = None
                 # key = keyboard.read_key(suppress=True)
                 key_event = keyboard.read_event(suppress=True)
                 key = key_event.name
+                # if kb.kbhit():
+                #     key = kb.getch()
                 if key == 'up':
                     self.selected_index = (self.selected_index - 1) % len(self.items)
                     break

@@ -10,13 +10,15 @@ class TransactionServer(Server):
         if command == 'add':
             transaction = pickle.loads(data)
             self.goodChain.add_to_pool(transaction, False)
+            self.goodChain.readable_transaction(transaction)
         elif command == "replace":
             old, new = pickle.loads(data)
             self.goodChain.replace_in_pool(old, new, False)
+            self.goodChain.readable_transaction(new)
         elif command == "remove":
             transaction = pickle.loads(data)
             self.goodChain.remove_from_pool(transaction, False)
-        
+            self.goodChain.readable_transaction(transaction)
 
 class TransactionClient(Client):
     def __init__(self):

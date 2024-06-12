@@ -4,6 +4,8 @@ from Menu import Menu
 from MenuMain import MenuMain
 from Pool import Pool
 import pickle
+import threading        
+
 
 class GoodChain:
     path = '../data/blockchain.dat'
@@ -18,10 +20,18 @@ class GoodChain:
         self.last_block = None
         self.load_block()
         self.menu = MenuMain(self)
+        self.servers = []
+        from NetTransaction import TransactionServer
+        self.servers.append(TransactionServer(self))
 
     def run(self):
+        for s in self.servers:
+            thread = threading.Thread(target=s.start_listening)
+            thread.start()
         while self.menu:
             self.menu.show()
+        for s in self.servers:
+            s.stop_listening()
 
     def log_in(self, user_list):
         self.user = User(user_list)
@@ -216,7 +226,7 @@ class GoodChain:
         pool.save_pool()
         if notify:
             from NetTransaction import TransactionClient
-            TransactionClient().send_transaction(tx)
+            TransactionClient().send_add_transaction(tx)
 
     def remove_from_pool(self, tx, notify = True):
         pool = Pool()
@@ -241,7 +251,9 @@ class GoodChain:
         i = pool.transactions.index(old)
         pool.transactions[i] = new
         pool.save_pool()
-        # TODO: send replacement msg
+        if notify:
+            from NetTransaction import TransactionClient
+            TransactionClient().send_replace_transaction(old, new)
 
     def validate_block(self, id):
         block = self.last_block
