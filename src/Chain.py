@@ -118,15 +118,6 @@ class GoodChain:
             self.last_block.next_block = block
         self.last_block = block
     
-    def add_to_pool(self, tx):
-        from NetTransaction import TransactionClient
-        pool = Pool()
-        if pool.tampered:
-            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
-        pool.add_tx(tx)
-        pool.save_pool()
-        TransactionClient().send_transaction(tx)
-    
     def readable_transaction(self, tx):
         result = ""
         for addr, amt in tx.outputs:
@@ -215,8 +206,19 @@ class GoodChain:
         for tx in transactions:
             self.remove_from_pool(tx)
         self.post_message(f"Block successfully mined in {time} seconds.")
-    
-    def remove_from_pool(self, tx):
+
+    def add_to_pool(self, tx, notify = True):
+        from NetTransaction import TransactionClient
+        pool = Pool()
+        if pool.tampered:
+            self.notifications.append("Detected pool tampering, all transactions removed from pool.")
+        pool.add_tx(tx)
+        pool.save_pool()
+        if notify:
+            from NetTransaction import TransactionClient
+            TransactionClient().send_transaction(tx)
+
+    def remove_from_pool(self, tx, notify = True):
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
@@ -225,8 +227,11 @@ class GoodChain:
         except:
             pass
         pool.save_pool()
-    
-    def replace_in_pool(self, old, new):
+        if notify:
+            from NetTransaction import TransactionClient
+            TransactionClient().send_remove_transaction(tx)
+
+    def replace_in_pool(self, old, new, notify = True):
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")

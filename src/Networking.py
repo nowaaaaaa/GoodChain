@@ -1,15 +1,19 @@
 import socket
 import threading
-HEADER_SIZE = 64
-DATA_FORMAT = 'utf-8'
-DISC_MSG = '!END'
-RET_MSG = '!VLD'
+import pickle
 
+class Header:
+    HEADER_SIZE = 256
+    def __init__(self, data_length, command):
+        self.data_length = data_length
+        self.command = command
+    
 class Server:
-    def __init__(self, host, port):
+    def __init__(self, host, port, goodChain):
         self.HOST = host
         self.PORT = port
         self.ADDR = (self.HOST, self.PORT)
+        self.goodChain = goodChain
 
     def start_listening(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -21,7 +25,18 @@ class Server:
                 thread = threading.Thread(target=self.handle_client, args=(conn, addr))
                 thread.start()
                 print(f"A new connection has been established. Total connections: {threading.activeCount() - 1}")
-
+    
+    def handle_client(self, conn, addr):
+        data_length = -1
+        command = -1
+        header = pickle.loads(conn.recv(Header.HEADER_SIZE))
+        if header is Header:
+            data_length = header.data_length
+            command = header.command
+            data = conn.recv(data_length)
+            data = pickle.loads(data)
+        conn.close()
+        self.handle_data(command, data)
 
 class Client:
     def __init__(self, host, port):
@@ -29,7 +44,7 @@ class Client:
         self.PORT = port
         self.ADDR = (self.HOST, self.PORT)
 
-    def send_data(self, data):
+    def send_data(self, header, data):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.settimeout(1)
         try:
@@ -37,12 +52,7 @@ class Client:
         except OSError:
             print(f'Error connecting to {self.ADDR}')
             return
-        formatted = data
-        message_length = len(formatted)
-        message_header = str(message_length)
-        message_header += ' ' * (HEADER_SIZE - len(message_header))
-        message_header = message_header.encode(DATA_FORMAT)
-        client_socket.send(message_header)
-        client_socket.send(formatted)
+        client_socket.send(header)
+        client_socket.send(data)
         client_socket.close()
     
