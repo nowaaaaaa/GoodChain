@@ -35,7 +35,7 @@ class GoodChain:
 
     def log_in(self, user_list):
         self.user = User(user_list)
-        if not self.last_block.is_validated():
+        if self.last_block != None and not self.last_block.is_validated():
             self.validate_block(self.last_block.block_id)
         pool = Pool()
         if pool.tampered:
