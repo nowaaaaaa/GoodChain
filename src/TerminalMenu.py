@@ -16,7 +16,7 @@ class TerminalMenu:
 
     def show(self):
         while True:
-            self.clear()
+            #self.clear()
             print(self.title)
             for i, item in enumerate(self.items):
                 if i == self.selected_index:
@@ -25,7 +25,6 @@ class TerminalMenu:
                     print(' ' + item.replace("\n", "\n "))
             kb = KeyboardInput.KBHit()
             key = None
-            # sleep(0.2)
             while key == None:
                 key = kb.getch()
                 if key == b'\xe0':

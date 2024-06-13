@@ -37,8 +37,10 @@ class Server:
         sock.close()
     
     def handle_client(self, conn, addr):
+        print("handle client")
         header = pickle.loads(conn.recv(Header.HEADER_SIZE))
-        if header is not Header:
+        if not isinstance(header, Header):
+            print("Invalid header")
             conn.close()
             return
         data_length = header.data_length
