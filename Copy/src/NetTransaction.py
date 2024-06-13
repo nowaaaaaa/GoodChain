@@ -7,15 +7,14 @@ class TransactionServer(Server):
         Server.__init__(self, HOST, PORT, goodChain)
     
     def handle_data(self, command, data):
-        print("header: ", command, f"data: {len(data)}", data)
         if command == 'add':
-            transaction = pickle.loads(data)
+            transaction = data
             self.goodChain.add_to_pool(transaction, False)
         elif command == "replace":
-            old, new = pickle.loads(data)
+            old, new = data
             self.goodChain.replace_in_pool(old, new, False)
         elif command == "remove":
-            transaction = pickle.loads(data)
+            transaction = data
             self.goodChain.remove_from_pool(transaction, False)
 
 class TransactionClient(Client):
@@ -26,18 +25,16 @@ class TransactionClient(Client):
 
     def send_add_transaction(self, tx):
         print("sending add")
-        tx = pickle.dumps(tx)
-        header = pickle.dumps(Header(len(tx), 'add'))
-        self.send_data(header, tx)
+        command = 'add'
+        self.send_data(command, tx)
     
     def send_replace_transaction(self, old, new):
         print("sending replace")
-        data = pickle.dumps((old, new))
-        header = pickle.dumps(Header(len(data), 'replace'))
-        self.send_data(header, data)
+        data = (old, new)
+        command = 'replace'
+        self.send_data(command, data)
     
     def send_remove_transaction(self, tx):
         print("sending remove")
-        tx = pickle.dumps(tx)
-        header = pickle.dumps(Header(len(tx), 'remove'))
-        self.send_data(header, tx)
+        command = 'remove'
+        self.send_data(command, tx)

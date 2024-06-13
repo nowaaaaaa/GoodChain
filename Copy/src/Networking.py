@@ -37,7 +37,6 @@ class Server:
         sock.close()
     
     def handle_client(self, conn, addr):
-        print("handle client")
         header = pickle.loads(conn.recv(Header.HEADER_SIZE))
         if not isinstance(header, Header):
             print("Invalid header")
@@ -45,7 +44,10 @@ class Server:
             return
         data_length = header.data_length
         command = header.command
-        data = conn.recv(data_length)
+        print(f"Data length: {data_length}")
+        received_data = conn.recv(data_length)
+        print(received_data)
+        data = pickle.loads(received_data)
         conn.close()
         self.handle_data(command, data)
 
@@ -55,7 +57,7 @@ class Client:
         self.PORT = port
         self.ADDR = (self.HOST, self.PORT)
 
-    def send_data(self, header, data):
+    def send_data(self, command, data):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.settimeout(1)
         try:
@@ -63,7 +65,12 @@ class Client:
         except OSError:
             print(f'Error connecting to {self.ADDR}')
             return
-        client_socket.send(header)
-        client_socket.send(data)
+        formatted_data = pickle.dumps(data)
+        header = Header(len(formatted_data), command)
+        print(f"Data length: {header.data_length}")
+        print(data)
+        formatted_header = pickle.dumps(header)
+        client_socket.send(formatted_header)
+        client_socket.send(formatted_data)
         client_socket.close()
     
