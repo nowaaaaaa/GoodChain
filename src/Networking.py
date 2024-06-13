@@ -46,7 +46,6 @@ class Server:
         data_length = header.data_length
         command = header.command
         data = conn.recv(data_length)
-        data = pickle.loads(data)
         conn.close()
         self.handle_data(command, data)
 
