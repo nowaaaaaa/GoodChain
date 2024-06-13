@@ -7,7 +7,7 @@ class TransactionServer(Server):
         Server.__init__(self, HOST, PORT, goodChain)
     
     def handle_data(self, command, data):
-        print("header: ", command, "data: ", data)
+        print("header: ", command, f"data: {len(data)}", data)
         if command == 'add':
             transaction = pickle.loads(data)
             self.goodChain.add_to_pool(transaction, False)
