@@ -21,14 +21,12 @@ class Server:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(self.ADDR)
             s.listen()
-            print(f'Server is listening to {self.ADDR}...')
             while self.listen:
                 conn, addr = s.accept()
                 if not self.listen:
                     break
                 thread = threading.Thread(target=self.handle_client, args=(conn, addr))
                 thread.start()
-                print(f"A new connection has been established. Total connections: {threading.activeCount() - 1}")
     
     def stop_listening(self):
         self.listen = False
@@ -39,14 +37,11 @@ class Server:
     def handle_client(self, conn, addr):
         header = pickle.loads(conn.recv(Header.HEADER_SIZE))
         if not isinstance(header, Header):
-            print("Invalid header")
             conn.close()
             return
         data_length = header.data_length
         command = header.command
-        print(f"Data length: {data_length}")
         received_data = conn.recv(data_length)
-        print(received_data)
         data = pickle.loads(received_data)
         conn.close()
         self.handle_data(command, data)
@@ -67,8 +62,6 @@ class Client:
             return
         formatted_data = pickle.dumps(data)
         header = Header(len(formatted_data), command)
-        print(f"Data length: {header.data_length}")
-        print(data)
         formatted_header = pickle.dumps(header)
         client_socket.send(formatted_header)
         client_socket.send(formatted_data)
