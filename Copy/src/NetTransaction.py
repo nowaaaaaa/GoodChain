@@ -24,14 +24,17 @@ class TransactionClient(Client):
         Client.__init__(self, HOST, PORT)
 
     def send_add_transaction(self, tx):
+        print("sending add")
         command = 'add'
         self.send_data(command, tx)
     
     def send_replace_transaction(self, old, new):
+        print("sending replace")
         data = (old, new)
         command = 'replace'
         self.send_data(command, data)
     
     def send_remove_transaction(self, tx):
+        print("sending remove")
         command = 'remove'
         self.send_data(command, tx)

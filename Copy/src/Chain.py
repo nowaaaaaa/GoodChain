@@ -121,22 +121,12 @@ class GoodChain:
                     amount += amt
         return amount
     
-    def add_block(self, block, transactions, notify = True):
-        if not notify:
-            #check if previousblock is self.last_block
-            #check if block is valid
-            pass
+    def add_block(self, block):
         if block.previous_block != self.last_block:
             return
         if self.last_block != None:
             self.last_block.next_block = block
         self.last_block = block
-        self.save_block()
-        self.load_block()
-        if notify:
-            pass
-        for tx in transactions:
-            self.remove_from_pool(tx, False)
     
     def readable_transaction(self, tx):
         result = ""
@@ -220,7 +210,11 @@ class GoodChain:
         if time < 10 or time > 20:
             self.post_message(f"Block mined in {time} seconds, which is not in the accepted range.")
             return
-        self.add_block(block, transactions)
+        self.add_block(block)
+        self.save_block()
+        self.load_block()
+        for tx in transactions:
+            self.remove_from_pool(tx)
         self.post_message(f"Block successfully mined in {time} seconds.")
 
     def add_to_pool(self, tx, notify = True):
@@ -228,8 +222,6 @@ class GoodChain:
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
-        if not tx.is_valid():
-            return    
         pool.add_tx(tx)
         pool.save_pool()
         if notify:
