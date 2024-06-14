@@ -62,6 +62,7 @@ class Client:
             return
         formatted_data = pickle.dumps(data)
         header = Header(len(formatted_data), command)
+        print(data)
         formatted_header = pickle.dumps(header)
         client_socket.send(formatted_header)
         client_socket.send(formatted_data)
