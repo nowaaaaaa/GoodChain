@@ -33,7 +33,7 @@ class GoodChain:
             thread.start()
         while self.menu:
             for user in self.network_users:
-                self.database.add_user(user.username, user.password, user.private_key, user.public_key)
+                self.database.add_network_user(user.username, user.password, user.private_key, user.public_key)
             self.network_users = []
             self.menu.show()
         for s in self.servers:
@@ -55,8 +55,6 @@ class GoodChain:
     def sign_up(self, username, password):
         self.database.add_user(username, password)
         self.log_in(self.database.verify_user(username, password))
-
-
         thread = threading.Thread(target=self.send_sign_up)
         thread.start()
 
@@ -255,7 +253,7 @@ class GoodChain:
         if notify:
             from NetTransaction import TransactionClient
             client = TransactionClient()
-            thread = threading.Thread(target=client.send_add_transaction, args=(tx))
+            thread = threading.Thread(target=client.send_add_transaction, args=[tx])
             thread.start()
 
     def remove_from_pool(self, tx, notify = True):
@@ -270,7 +268,7 @@ class GoodChain:
         if notify:
             from NetTransaction import TransactionClient
             client = TransactionClient()
-            thread = threading.Thread(target=client.send_remove_transaction, args=(tx))
+            thread = threading.Thread(target=client.send_remove_transaction, args=[tx])
             thread.start()
 
     def replace_in_pool(self, old, new, notify = True):

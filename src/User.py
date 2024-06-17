@@ -11,3 +11,6 @@ class User:
     
     def get_protected_user(self):
         return User([self.username, self.password, self.private_key, self.public_key])
+        
+    def __repr__(self):
+        return f"User({self.username}, {self.password}, {self.private_key}, {self.public_key})"
