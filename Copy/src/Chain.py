@@ -54,11 +54,16 @@ class GoodChain:
     
     def sign_up(self, username, password):
         self.database.add_user(username, password)
+        self.log_in(self.database.verify_user(username, password))
+
+
+        thread = threading.Thread(target=self.send_sign_up)
+        thread.start()
+
+    def send_sign_up(self):
         from NetUser import UserClient
         client = UserClient()
-        thread = threading.Thread(target=client.send_add_user, args=(username, password))
-        thread.start()
-        self.log_in(self.database.verify_user(username, password))
+        client.send_add_user(self.user.get_protected_user()) 
         self.reward_sign_up()
 
     def reward_sign_up(self):
