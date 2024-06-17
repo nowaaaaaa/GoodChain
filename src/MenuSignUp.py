@@ -33,9 +33,7 @@ class MenuSignUp(Menu):
         if (self.username == "" or self.password == ""):
             self.reload_menu("\nPlease enter a valid username and password")
             return
-        self.goodChain.database.add_user(self.username, self.password)
-        self.goodChain.log_in(self.goodChain.database.verify_user(self.username, self.password))
-        self.goodChain.reward_sign_up()
+        self.goodChain.sign_up(self.username, self.password)
         self.goodChain.set_menu(MenuUser(self.goodChain))
     
     def back(self):
