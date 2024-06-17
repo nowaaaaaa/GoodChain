@@ -24,6 +24,8 @@ class GoodChain:
         self.servers = []
         from NetTransaction import TransactionServer
         self.servers.append(TransactionServer(self))
+        from NetUser import UserServer
+        self.servers.append(UserServer(self))
 
     def run(self):
         for s in self.servers:
@@ -50,6 +52,13 @@ class GoodChain:
                 self.add_message("Invalid transaction removed from pool")
                 pool.remove_invalid(tx)
     
+    def sign_up(self, username, password):
+        self.database.add_user(username, password)
+        from NetUser import UserClient
+        client = UserClient()
+        thread = threading.Thread(target=client.send_add_user(username, password))
+        thread.start()
+
     def reward_sign_up(self):
         from Transaction import Transaction
         tx = Transaction()
@@ -238,7 +247,10 @@ class GoodChain:
         pool.save_pool()
         if notify:
             from NetTransaction import TransactionClient
-            TransactionClient().send_add_transaction(tx)
+            client = TransactionClient()
+            thread = threading.Thread(target=client.send_add_transaction(tx))
+            thread.start()
+
 
     def remove_from_pool(self, tx, notify = True):
         pool = Pool()
@@ -251,7 +263,9 @@ class GoodChain:
         pool.save_pool()
         if notify:
             from NetTransaction import TransactionClient
-            TransactionClient().send_remove_transaction(tx)
+            client = TransactionClient()
+            thread = threading.Thread(target=client().send_remove_transaction(tx))
+            thread.start()
 
     def replace_in_pool(self, old, new, notify = True):
         pool = Pool()
@@ -265,7 +279,9 @@ class GoodChain:
         pool.save_pool()
         if notify:
             from NetTransaction import TransactionClient
-            TransactionClient().send_replace_transaction(old, new)
+            client = TransactionClient()
+            thread = threading.Thread(target=client.send_replace_transaction(old, new))
+            thread.start()
 
     def validate_block(self, id):
         block = self.last_block
