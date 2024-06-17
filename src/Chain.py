@@ -20,6 +20,7 @@ class GoodChain:
         self.last_block = None
         self.load_block()
         self.menu = MenuMain(self)
+        self.network_users = []
         self.servers = []
         from NetTransaction import TransactionServer
         self.servers.append(TransactionServer(self))
@@ -29,6 +30,9 @@ class GoodChain:
             thread = threading.Thread(target=s.start_listening)
             thread.start()
         while self.menu:
+            for user in self.network_users:
+                self.database.add_user(user.username, user.password, user.private_key, user.public_key)
+            self.network_users = []
             self.menu.show()
         for s in self.servers:
             s.stop_listening()
@@ -373,3 +377,6 @@ class GoodChain:
             res += "\n" + n
         self.notifications = []
         return res
+
+    def add_network_user(self, user):
+        self.network_users.append(user)

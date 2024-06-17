@@ -71,6 +71,14 @@ class Database:
         """, (username, hash_password(password), prv, pub))
         self.connection.commit()
         self.enter_hash()
+    
+    def add_network_user(self, username, password_hash, private_key_encryted, public_key):
+        self.cursor.execute("""
+            INSERT INTO users VALUES
+                (?, ?, ?, ?)
+        """, (username, password_hash, private_key_encryted, public_key))
+        self.connection.commit()
+        self.enter_hash()
 
     def get_public_key(self, username):
         self.cursor.execute("""
