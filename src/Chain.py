@@ -141,20 +141,19 @@ class GoodChain:
     
     def add_block(self, block, transactions, notify = True):
         if not notify:
-            #check if previousblock is self.last_block
-            #check if block is valid
-            pass
-        if block.previous_block != self.last_block:
+            block.previous_block = self.last_block
+            if not block.is_valid() or not (self.last_block == None or self.last_block.is_validated()):
+                return
+        elif block.previous_block != self.last_block:
             return
         if self.last_block != None:
             self.last_block.next_block = block
         self.last_block = block
         self.save_block()
         self.load_block()
-        if notify:
-            pass
         for tx in transactions:
             self.remove_from_pool(tx, False)
+        # Notify network
     
     def readable_transaction(self, tx):
         result = ""
@@ -300,7 +299,7 @@ class GoodChain:
         self.save_block()
         if not balance_correct or validation_result == 0:
             self.post_message(f"Could not validate invalid block {block.block_id}.")
-            block.sign_inv(self.user.get_private_key(), self.user.public_key)
+            self.invalidate_block(block)
             self.save_block()
         elif validation_result == 1:
             self.post_message(f"Could not validate block {block.block_id}, already validated by you")
@@ -313,6 +312,46 @@ class GoodChain:
             return None
         self.save_block()
         return block
+    
+    def invalidate_block(self, block):
+        if block.invalidated_by(self.user.public_key):
+            return
+        block.sign_inv(self.user.get_private_key(), self.user.public_key)
+        # Notify network
+        
+    def add_network_validation(self, block_id, public_key, sig):
+        if self.last_block == None or self.last_block.block_id < block_id:
+            return
+        block = self.last_block
+        while block.block_id != block_id and block != None:
+            block = block.previous_block
+        if block == None:
+            return
+        if block.validated_by(public_key):
+            return
+        from Signature import verify
+        if verify(block.compute_hash(), sig, public_key):
+            block.sigs.append((sig, public_key))
+            if block.is_validated():
+                self.post_message(f"Block {block.block_id} validated by network")
+            self.save_block()
+
+    def add_network_invalidation(self, block_id, public_key, sig):
+        if self.last_block == None or self.last_block.block_id < block_id:
+            return
+        block = self.last_block
+        while block.block_id != block_id and block != None:
+            block = block.previous_block
+        if block == None:
+            return
+        if block.invalidated_by(public_key):
+            return
+        from Signature import verify
+        if verify(block.compute_hash(), sig, public_key):
+            block.inv_sigs.append((sig, public_key))
+            if len(block.inv_sigs) >= 3:
+                self.remove_invalidated_block(block_id)
+                self.post_message(f"Block {block.block_id} invalidated by network")
 
     def get_last_valid(self):
         block = self.last_block
@@ -338,6 +377,7 @@ class GoodChain:
         self.last_block = block
         self.last_block.next_block = None
         self.notifications.append(f"Detected tampering with the blockchain, removed blocks after block {last_valid}.")
+        self.save_block()
 
     def get_pool(self):
         pool = Pool()
