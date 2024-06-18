@@ -9,11 +9,10 @@ class Block:
         self.data = data
         self.previous_block = previous_block
         self.block_id = 0
+        self.previous_hash = None
         if previous_block != None:
             self.previous_hash = previous_block.compute_hash()
             self.block_id = previous_block.block_id + 1
-        else:
-            self.previous_hash = None
         self.next_block = None
         self.sigs = []
         self.inv_sigs = []
@@ -80,6 +79,12 @@ class Block:
         for sig, key in self.sigs:
             if key == public_key:
                 return True
+        for sig, key in self.inv_sigs:
+            if key == public_key:
+                return True
+        return False
+
+    def invalidated_by(self, public_key):
         for sig, key in self.inv_sigs:
             if key == public_key:
                 return True

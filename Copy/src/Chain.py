@@ -26,6 +26,8 @@ class GoodChain:
         self.servers.append(TransactionServer(self))
         from NetUser import UserServer
         self.servers.append(UserServer(self))
+        from NetBlock import BlockServer
+        self.servers.append(BlockServer(self))
 
     def run(self):
         for s in self.servers:
@@ -141,20 +143,23 @@ class GoodChain:
     
     def add_block(self, block, transactions, notify = True):
         if not notify:
-            #check if previousblock is self.last_block
-            #check if block is valid
-            pass
-        if block.previous_block != self.last_block:
+            block.previous_block = self.last_block
+            if not block.is_valid() or not (self.last_block == None or self.last_block.is_validated()):
+                return
+        elif block.previous_block != self.last_block:
             return
         if self.last_block != None:
             self.last_block.next_block = block
         self.last_block = block
         self.save_block()
         self.load_block()
-        if notify:
-            pass
         for tx in transactions:
             self.remove_from_pool(tx, False)
+        if notify:
+            from NetBlock import BlockClient
+            client = BlockClient()
+            thread = threading.Thread(target=client.send_add_block, args=[block])
+            thread.start()
     
     def readable_transaction(self, tx):
         result = ""
@@ -300,8 +305,12 @@ class GoodChain:
         self.save_block()
         if not balance_correct or validation_result == 0:
             self.post_message(f"Could not validate invalid block {block.block_id}.")
-            block.sign_inv(self.user.get_private_key(), self.user.public_key)
-            self.save_block()
+            self.invalidate_block(block)
+            from NetBlock import BlockClient
+            client = BlockClient()
+            sig = block.sigs[len(block.sigs)-1]
+            thread = threading.Thread(target=client.send_invalidation, args=(block.block_id, sig[1], sig[0]))
+            thread.start()
         elif validation_result == 1:
             self.post_message(f"Could not validate block {block.block_id}, already validated by you")
             return None
@@ -311,8 +320,53 @@ class GoodChain:
             self.remove_invalidated_block(block.id)
             self.post_message(f"Block {block.block_id} invalidated by 3 users, removed it from blockchain.")
             return None
-        self.save_block()
         return block
+    
+    def invalidate_block(self, block):
+        if block.invalidated_by(self.user.public_key):
+            return
+        block.sign_inv(self.user.get_private_key(), self.user.public_key)
+        self.save_block()
+        from NetBlock import BlockClient
+        client = BlockClient()
+        sig = block.inv_sigs[len(block.inv_sigs)-1]
+        thread = threading.Thread(target=client.send_invalidation, args=(block.block_id, sig[1], sig[0]))
+        thread.start()
+        
+    def add_network_validation(self, block_id, public_key, sig):
+        if self.last_block == None or self.last_block.block_id < block_id:
+            return
+        block = self.last_block
+        while block.block_id != block_id and block != None:
+            block = block.previous_block
+        if block == None:
+            return
+        if block.validated_by(public_key):
+            return
+        from Signature import verify
+        if verify(block.compute_hash(), sig, public_key):
+            block.sigs.append((sig, public_key))
+            if block.is_validated():
+                self.post_message(f"Block {block.block_id} validated by network")
+            self.save_block()
+
+    def add_network_invalidation(self, block_id, public_key, sig):
+        if self.last_block == None or self.last_block.block_id < block_id:
+            return
+        block = self.last_block
+        while block.block_id != block_id and block != None:
+            block = block.previous_block
+        if block == None:
+            return
+        if block.invalidated_by(public_key):
+            return
+        from Signature import verify
+        if verify(block.compute_hash(), sig, public_key):
+            block.inv_sigs.append((sig, public_key))
+            if len(block.inv_sigs) >= 3:
+                self.remove_invalidated_block(block_id)
+                self.post_message(f"Block {block.block_id} invalidated by network")
+            self.save_block()
 
     def get_last_valid(self):
         block = self.last_block
@@ -328,16 +382,51 @@ class GoodChain:
         if last_valid == -1:
             self.last_block = None
             self.notifications.append("Detected tampering with the blockchain, all blocks removed.")
+            from NetBlock import BlockClient
+            client = BlockClient()
+            thread = threading.Thread(target=client.send_remove_block, args=[None])
+            thread.start()
             return
         while block.block_id > last_valid and block != None:
             block = block.previous_block
         if block == None:
             self.last_block = None
             self.notifications.append("Detected tampering with the blockchain, all blocks removed.")
+            from NetBlock import BlockClient
+            client = BlockClient()
+            thread = threading.Thread(target=client.send_remove_block, args=[None])
+            thread.start()
             return
         self.last_block = block
         self.last_block.next_block = None
         self.notifications.append(f"Detected tampering with the blockchain, removed blocks after block {last_valid}.")
+        from NetBlock import BlockClient
+        client = BlockClient()
+        thread = threading.Thread(target=client.send_remove_block, args=[self.last_block])
+        self.save_block()
+    
+    def network_remove_invalid_blocks(self, last_valid, invalidated):
+        if last_valid == None:
+            self.last_block = None
+            self.notifications.append("Network detected tampering with the blockchain, all blocks removed.")
+        block_id = last_valid.block_id
+        if self.last_block == None or self.last_block.block_id < block_id:
+            return
+        block = self.last_block
+        while block.block_id != block_id and block != None:
+            block = block.previous_block
+        if block == None:
+            return
+        if block != last_valid:
+            return
+        if invalidated:
+            self.notifications.append(f"Network invalidated block.")
+            self.remove_invalidated_block(block_id)
+            return
+        self.last_block = block
+        self.last_block.next_block = None
+        self.save_block()
+        self.notifications.append(f"Network detected tampering with the blockchain, removed blocks after block {block_id}.")
 
     def get_pool(self):
         pool = Pool()
@@ -382,6 +471,10 @@ class GoodChain:
         self.save_block()
         self.load_block()
         self.post_message(f"Invalid block {id} removed from blockchain")
+        from NetBlock import BlockClient
+        client = BlockClient()
+        thread = threading.Thread(target=client.send_remove_invalidated_block, args=[self.last_block])
+        thread.start()
     
     def count_tx(self):
         block = self.last_block
