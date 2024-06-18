@@ -109,3 +109,6 @@ class Block:
             if tx.ingoing[0] == public_key:
                 amount += tx.ingoing[1]
         return amount
+    
+    def __repr__(self):
+        return f"Block {self.block_id} hash: {self.compute_hash()}"

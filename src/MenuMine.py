@@ -12,7 +12,7 @@ class MenuMine(Menu):
         self.transactions = transactions
         title = f"Select transactions to include in the block\n Current miner reward: {self.get_total_reward()} coins{error}"
         if len(goodChain.get_optional_transactions()) == 0: 
-            title = f"No more transactions include in the block\n Current miner reward: {self.get_total_reward()} coins{error}"
+            title = f"No more transactions to include in the block\n Current miner reward: {self.get_total_reward()} coins{error}"
         items = []
         functions = []
         for tx in goodChain.get_optional_transactions():
