@@ -314,6 +314,11 @@ class GoodChain:
             self.post_message(f"Could not validate block {block.block_id}, already validated by you")
             return None
         elif validation_result == 2:
+            from NetBlock import BlockClient
+            client = BlockClient()
+            sig = block.sigs[len(block.sigs)-1]
+            thread = threading.Thread(target=client.send_validation, args=(block.block_id, sig[1], sig[0]))
+            thread.start()
             return block
         if len(block.inv_sigs) >= 3:
             self.remove_invalidated_block(block.id)
