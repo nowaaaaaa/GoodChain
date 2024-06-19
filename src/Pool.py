@@ -1,6 +1,8 @@
 import pickle
+import threading
 class Pool:
     path = '../data/pool.dat'
+    lock = threading.Lock()
     
     def __init__(self):
         self.transactions = []
@@ -13,6 +15,7 @@ class Pool:
         from os.path import exists
         if not exists(self.path):
             return
+        self.lock.acquire()
         try:
             with open(self.path, 'rb') as f:
                 self.transactions = pickle.load(f)
@@ -25,13 +28,18 @@ class Pool:
                     self.tampered = True
         except:
             self.tampered = True
-            return
+        self.lock.release()
     
     def save_pool(self):
-        with open(self.path, 'wb') as f:
-            pickle.dump(self.transactions, f)
-            pickle.dump(self.invalid, f)
-            pickle.dump(self.compute_hash(), f)
+        self.lock.acquire()
+        try:
+            with open(self.path, 'wb') as f:
+                pickle.dump(self.transactions, f)
+                pickle.dump(self.invalid, f)
+                pickle.dump(self.compute_hash(), f)
+        except:
+            pass
+        self.lock.release()
         print("save", self.compute_hash())
 
     def add_tx(self, tx):
