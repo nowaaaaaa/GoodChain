@@ -18,6 +18,7 @@ class Pool:
                 self.transactions = pickle.load(f)
                 self.invalid = pickle.load(f)
                 loaded_hash = pickle.load(f)
+                print("load", loaded_hash)
                 if loaded_hash != self.compute_hash():
                     self.transactions = []
                     self.invalid = []
@@ -31,6 +32,7 @@ class Pool:
             pickle.dump(self.transactions, f)
             pickle.dump(self.invalid, f)
             pickle.dump(self.compute_hash(), f)
+        print("save", self.compute_hash())
 
     def add_tx(self, tx):
         self.transactions.append(tx)

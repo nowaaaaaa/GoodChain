@@ -254,7 +254,6 @@ class GoodChain:
         if not tx.is_valid():
             return    
         pool.add_tx(tx)
-        pool.save_pool()
         if notify:
             from NetTransaction import TransactionClient
             client = TransactionClient()
