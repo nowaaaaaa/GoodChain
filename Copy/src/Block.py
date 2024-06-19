@@ -76,6 +76,8 @@ class Block:
         return 2
     
     def validated_by(self, public_key):
+        if self.miner == public_key:
+            return True
         for sig, key in self.sigs:
             if key == public_key:
                 return True

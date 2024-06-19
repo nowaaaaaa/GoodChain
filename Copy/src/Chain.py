@@ -34,6 +34,8 @@ class GoodChain:
             thread = threading.Thread(target=s.start_listening)
             thread.start()
         while self.menu:
+            if self.last_block != None and not self.last_block.is_validated():
+                self.validate_block(self.last_block.block_id)
             for user in self.network_users:
                 self.database.add_network_user(user.username, user.password, user.private_key, user.public_key)
             self.network_users = []
