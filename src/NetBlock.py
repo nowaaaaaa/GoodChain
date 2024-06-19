@@ -8,8 +8,8 @@ class BlockServer(Server):
     
     def handle_data(self, command, data):
         if command == 'add':
-            block = data
-            self.goodChain.add_block(block, False)
+            (block, transactions) = data
+            self.goodChain.add_block(block, transactions, False)
         elif command == "remove":
             block = data
             self.goodChain.network_remove_invalid_block(block, False)
@@ -29,9 +29,10 @@ class BlockClient(Client):
         PORT = 50005
         Client.__init__(self, HOST, PORT)
 
-    def send_add_block(self, block):
+    def send_add_block(self, block, transactions):
         command = 'add'
-        self.send_data(command, block)
+        data = (block, transactions)
+        self.send_data(command, data)
     
     def send_remove_block(self, block):
         command = 'remove'
