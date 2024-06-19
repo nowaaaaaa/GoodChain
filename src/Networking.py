@@ -42,7 +42,9 @@ class Server:
         data_length = header.data_length
         command = header.command
         received_data = conn.recv(data_length)
+        print("Received data: ", received_data)
         data = pickle.loads(received_data)
+        print("Depickled data: ", data)
         conn.close()
         self.handle_data(command, data)
 
@@ -63,6 +65,7 @@ class Client:
         formatted_data = pickle.dumps(data)
         header = Header(len(formatted_data), command)
         print(data) # NIET VERWIJDEREN/DON'T REMOVE - ALL NETWORKING CODE WILL BREAK OTHERWISE
+        print(formatted_data)
         formatted_header = pickle.dumps(header)
         client_socket.send(formatted_header)
         client_socket.send(formatted_data)
