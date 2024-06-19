@@ -143,10 +143,8 @@ class GoodChain:
     
     def add_block(self, block, transactions, notify = True):
         if not notify:
-            print("Not notify")
             block.previous_block = self.last_block
             if not block.is_valid() or not (self.last_block == None or self.last_block.is_validated()):
-                print("Invalid block", block.is_valid(), self.last_block == None or self.last_block.is_validated())
                 return
         elif block.previous_block != self.last_block:
             return

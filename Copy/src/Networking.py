@@ -42,9 +42,7 @@ class Server:
         data_length = header.data_length
         command = header.command
         received_data = conn.recv(data_length)
-        print("Received data: ", received_data)
         data = pickle.loads(received_data)
-        print("Depickled data: ", data)
         conn.close()
         self.handle_data(command, data)
 
