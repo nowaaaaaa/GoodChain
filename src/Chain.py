@@ -123,10 +123,11 @@ class GoodChain:
         return amount
     
     def check_available(self, public_key):
-        return self.check_balance(public_key) - self.check_pool()
+        return self.check_balance(public_key) - self.check_pool(public_key)
 
-    def check_pool(self):
-        public_key = self.user.public_key
+    def check_pool(self, public_key = None):
+        if public_key == None:
+            public_key = self.user.public_key
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
@@ -483,6 +484,8 @@ class GoodChain:
                 pool.invalid.append(t)
         pool.transactions = tx
         pool.save_pool()
+        print("last block ", self.last_block)
+        print("block.previous_block", block.previous_block)
         self.last_block = block.previous_block
         self.last_block.next_block = None
         self.save_block()
