@@ -25,12 +25,6 @@ class MenuMine(Menu):
         functions.append(self.mine_block)
         items.append("Back")
         functions.append(self.back)
-        # for tx in self.transactions:
-        #     if tx in self.transactions:
-        #         items.append(Fore.GREEN + self.display_transaction(tx) + Style.RESET_ALL)
-        #     else:
-        #         items.append(self.display_transaction(tx))            
-        #     functions.append(lambda tx=tx : self.toggle_transaction(tx))
         Menu.__init__(self, goodChain, title, items, functions)
         self.terminal_menu.selected_index = selected_index
 
