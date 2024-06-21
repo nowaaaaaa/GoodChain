@@ -12,6 +12,7 @@ class GoodChain:
     messages = []
     notifications = []
     user = None
+    invalid_lock = threading.Lock()
 
     def __init__(self):
         self.database = Database()
@@ -253,7 +254,7 @@ class GoodChain:
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
-        if not tx.is_valid():
+        if not tx.is_valid() or self.check_available(tx.ingoing[0]) < sum([o[1] for o in tx.outputs]):
             return    
         pool.add_tx(tx)
         if notify:
@@ -294,6 +295,8 @@ class GoodChain:
             thread.start()
 
     def validate_block(self, id):
+        if self.user != None and self.last_block.validated_by(self.user.public_key):
+            return None
         block = self.last_block
         while block != None and block.block_id != id:
             block = block.previous_block
@@ -309,8 +312,12 @@ class GoodChain:
             self.invalidate_block(block)
             from NetBlock import BlockClient
             client = BlockClient()
-            sig = block.sigs[len(block.sigs)-1]
-            thread = threading.Thread(target=client.send_invalidation, args=(block.block_id, sig[1], sig[0]))
+            sig = block.inv_sigs[len(block.inv_sigs)-1]
+            def locked_send_invalidation():
+                self.invalid_lock.acquire()
+                client.send_invalidation(block.block_id, sig[1], sig[0])
+                self.invalid_lock.release()
+            thread = threading.Thread(target=locked_send_invalidation)
             thread.start()
         elif validation_result == 1:
             return None
@@ -389,7 +396,11 @@ class GoodChain:
             self.notifications.append("Detected tampering with the blockchain, all blocks removed.")
             from NetBlock import BlockClient
             client = BlockClient()
-            thread = threading.Thread(target=client.send_remove_block, args=[None])
+            def locked_remove_block():
+                self.invalid_lock.acquire()
+                client.send_remove_block(None)
+                self.invalid_lock.release()
+            thread = threading.Thread(target=locked_remove_block)
             thread.start()
             return
         while block.block_id > last_valid and block != None:

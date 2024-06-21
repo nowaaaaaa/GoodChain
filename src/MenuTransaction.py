@@ -43,9 +43,9 @@ class MenuTransaction(Menu):
             addr = raw_addr
             username = self.goodChain.database.get_username(raw_addr)
         amount = input(f"Enter the amount to send to {username}: ")
-        if not is_float(amount) or float(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + float(amount):
-            self.reload_menu("Invalid amount entered")
-            return
+        # if not is_float(amount) or float(amount) <= 0 or self.goodChain.check_available(self.goodChain.user.public_key) < self.get_total_output() + float(amount):
+        #     self.reload_menu("Invalid amount entered")
+        #     return
         self.transaction.add_output(addr, float(amount))
         self.reload_menu()
 
@@ -66,9 +66,9 @@ class MenuTransaction(Menu):
             self.reload_menu("No outputs specified")
             return
         output = sum([o[1] for o in self.transaction.outputs])
-        if self.goodChain.check_available(self.goodChain.user.public_key) < output:
-            self.reload_menu("Insufficient balance")
-            return
+        # if self.goodChain.check_available(self.goodChain.user.public_key) < output:
+        #     self.reload_menu("Insufficient balance")
+        #     return
         self.transaction.set_input(self.goodChain.user.public_key, output)
         self.transaction.sign(self.goodChain.user.get_private_key())
         if not self.transaction.is_valid():
