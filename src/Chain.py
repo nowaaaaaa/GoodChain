@@ -329,7 +329,7 @@ class GoodChain:
             thread.start()
             return block
         if len(block.inv_sigs) >= 3:
-            self.remove_invalidated_block(block.id)
+            self.remove_invalidated_block(block.block_id)
             self.post_message(f"Block {block.block_id} invalidated by 3 users, removed it from blockchain.")
             return None
         return block
