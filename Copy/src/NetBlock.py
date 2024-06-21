@@ -12,10 +12,10 @@ class BlockServer(Server):
             self.goodChain.add_block(block, transactions, False)
         elif command == "remove":
             block = data
-            self.goodChain.network_remove_invalid_block(block, False)
+            self.goodChain.network_remove_invalid_blocks(block, False)
         elif command == "remove_invalidated":
             block = data
-            self.goodChain.network_remove_invalid_block(block, True)
+            self.goodChain.network_remove_invalid_blocks(block, True)
         elif command == "validate":
             (block_id, public_key, sig) = data
             self.goodChain.add_network_validation(block_id, public_key, sig)
