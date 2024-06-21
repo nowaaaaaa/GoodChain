@@ -46,7 +46,7 @@ class Block:
         return end - start
 
     def is_valid(self):
-        if not self.verify_reward():
+        if not self.verify_reward() or self.compute_hash() != self.hash:
             return False
         if self.previous_block == None:
             return True
