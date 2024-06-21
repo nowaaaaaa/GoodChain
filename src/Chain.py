@@ -150,6 +150,7 @@ class GoodChain:
             block.previous_block = self.last_block
             if not block.is_valid() or not (self.last_block == None or self.last_block.is_validated()):
                 return
+            self.post_message("Network added block to blockchain")
         elif block.previous_block != self.last_block:
             return
         if self.last_block != None:
