@@ -484,8 +484,6 @@ class GoodChain:
                 pool.invalid.append(t)
         pool.transactions = tx
         pool.save_pool()
-        print("last block ", self.last_block)
-        print("block.previous_block", block.previous_block)
         self.last_block = block.previous_block
         self.last_block.next_block = None
         self.save_block()
@@ -493,7 +491,7 @@ class GoodChain:
         self.post_message(f"Invalid block {id} removed from blockchain")
         from NetBlock import BlockClient
         client = BlockClient()
-        thread = threading.Thread(target=client.send_remove_invalidated_block, args=[self.last_block])
+        thread = threading.Thread(target=client.send_remove_invalidated_block, args=[block])
         thread.start()
     
     def count_tx(self):

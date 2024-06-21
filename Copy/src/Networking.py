@@ -58,7 +58,6 @@ class Client:
         try:
             client_socket.connect(self.ADDR)
         except OSError:
-            print(f'Error connecting to {self.ADDR}')
             return
         formatted_data = pickle.dumps(data)
         header = Header(len(formatted_data), command)
