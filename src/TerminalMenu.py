@@ -27,7 +27,7 @@ class TerminalMenu:
             key = None
             while key == None:
                 key = kb.getch()
-                if key == b'\xe0':
+                if key == b'\xe0' or key == b'\x00':
                     key = kb.getch()
                     if key == b'H':
                         self.selected_index = (self.selected_index - 1) % len(self.items)
