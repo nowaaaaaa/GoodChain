@@ -256,7 +256,7 @@ class GoodChain:
         pool = Pool()
         if pool.tampered:
             self.notifications.append("Detected pool tampering, all transactions removed from pool.")
-        if not tx.is_valid() or self.check_available(tx.ingoing[0]) < sum([o[1] for o in tx.outputs]):
+        if not tx.is_valid() or (tx.ingoing[0] != None and self.check_available(tx.ingoing[0]) < tx.ingoing[1]):
             return    
         pool.add_tx(tx)
         if notify:
